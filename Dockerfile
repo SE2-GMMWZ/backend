@@ -13,6 +13,6 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /build/main /app/main
-COPY ./migrations /app/migrations
+# COPY ./migrations /app/migrations
 
 ENTRYPOINT ["/app/main"]
