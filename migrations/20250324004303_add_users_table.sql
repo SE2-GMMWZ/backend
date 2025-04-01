@@ -1,9 +1,16 @@
 -- +goose Up
 -- +goose StatementBegin
-SELECT 'up SQL query';
+CREATE TABLE users (
+                       id BIGSERIAL PRIMARY KEY,
+                       username VARCHAR(255) NOT NULL,
+                       email VARCHAR(255) NOT NULL,
+                       password VARCHAR(255) NOT NULL,
+                       verified BOOLEAN NOT NULL DEFAULT FALSE,
+                       verification_code VARCHAR(255)
+);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+DROP TABLE users;
 -- +goose StatementEnd
