@@ -26,7 +26,7 @@ func main() {
 	if dbString == "" || migrationDir == "" {
 		log.Fatalf("Missing required environment variables: GOOSE_DBSTRING or GOOSE_MIGRATION_DIR")
 	}
-	
+
 	db, err := sql.Open("postgres", dbString)
 	if err != nil {
 		log.Fatalf("Failed to open DB connection: %v", err)
