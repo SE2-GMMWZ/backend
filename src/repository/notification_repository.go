@@ -31,3 +31,9 @@ func (r *NotificationRepository) UpdateNotification(notification *model.Notifica
 func (r *NotificationRepository) DeleteNotification(id uuid.UUID) error {
 	return r.db.Delete(&model.Notification{}, "notification_id = ?", id).Error
 }
+
+func (r *NotificationRepository) ListNotifications(limit, offset int) ([]model.Notification, error) {
+	var notifications []model.Notification
+	err := r.db.Limit(limit).Offset(offset).Find(&notifications).Error
+	return notifications, err
+}

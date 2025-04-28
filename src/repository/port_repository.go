@@ -24,6 +24,12 @@ func (r *PortRepository) GetPortByID(id uuid.UUID) (*model.Port, error) {
 	return &port, err
 }
 
+func (r *PortRepository) ListPorts(limit, offset int) ([]model.Port, error) {
+	var ports []model.Port
+	err := r.db.Limit(limit).Offset(offset).Find(&ports).Error
+	return ports, err
+}
+
 func (r *PortRepository) UpdatePort(port *model.Port) error {
 	return r.db.Save(port).Error
 }

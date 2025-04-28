@@ -3,6 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
+	"backend/src/rest/shared"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -80,6 +81,10 @@ func (dsc *dockingSpotController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (dsc *dockingSpotController) List(c *gin.Context) {
+	shared.ListEntities(c, dsc.dockingSpotRepository.ListDockingSpots)
+}
+
 func AddDockingSpotRoutes(r *gin.Engine, dockingSpotRepository *repository.DockingSpotRepository) {
 	dsc := dockingSpotController{dockingSpotRepository: dockingSpotRepository}
 
@@ -87,6 +92,7 @@ func AddDockingSpotRoutes(r *gin.Engine, dockingSpotRepository *repository.Docki
 	{
 		dockingSpots.POST("", dsc.Create)
 		dockingSpots.GET("/:id", dsc.Get)
+		dockingSpots.GET("/list", dsc.List) // This line adds the List route
 		dockingSpots.PUT("/:id", dsc.Update)
 		dockingSpots.DELETE("/:id", dsc.Delete)
 	}

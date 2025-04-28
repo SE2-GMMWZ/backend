@@ -3,6 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
+	"backend/src/rest/shared"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -80,6 +81,10 @@ func (pc *portController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (pc *portController) List(c *gin.Context) {
+	shared.ListEntities(c, pc.portRepository.ListPorts)
+}
+
 func AddPortRoutes(r *gin.Engine, portRepository *repository.PortRepository) {
 	pc := portController{portRepository: portRepository}
 
@@ -87,6 +92,7 @@ func AddPortRoutes(r *gin.Engine, portRepository *repository.PortRepository) {
 	{
 		ports.POST("", pc.Create)
 		ports.GET("/:id", pc.Get)
+		ports.GET("/list", pc.List)
 		ports.PUT("/:id", pc.Update)
 		ports.DELETE("/:id", pc.Delete)
 	}

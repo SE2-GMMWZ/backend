@@ -3,6 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
+	"backend/src/rest/shared"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -80,6 +81,10 @@ func (nc *notificationController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (nc *notificationController) List(c *gin.Context) {
+	shared.ListEntities(c, nc.notificationRepository.ListNotifications)
+}
+
 func AddNotificationRoutes(r *gin.Engine, notificationRepository *repository.NotificationRepository) {
 	nc := notificationController{notificationRepository: notificationRepository}
 
@@ -87,6 +92,7 @@ func AddNotificationRoutes(r *gin.Engine, notificationRepository *repository.Not
 	{
 		notifications.POST("", nc.Create)
 		notifications.GET("/:id", nc.Get)
+		notifications.GET("/list", nc.List) // This line adds the List route
 		notifications.PUT("/:id", nc.Update)
 		notifications.DELETE("/:id", nc.Delete)
 	}

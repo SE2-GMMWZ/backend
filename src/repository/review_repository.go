@@ -31,3 +31,9 @@ func (r *ReviewRepository) UpdateReview(review *model.Review) error {
 func (r *ReviewRepository) DeleteReview(id uuid.UUID) error {
 	return r.db.Delete(&model.Review{}, "review_id = ?", id).Error
 }
+
+func (r *ReviewRepository) ListReviews(limit, offset int) ([]model.Review, error) {
+	var reviews []model.Review
+	err := r.db.Limit(limit).Offset(offset).Find(&reviews).Error
+	return reviews, err
+}

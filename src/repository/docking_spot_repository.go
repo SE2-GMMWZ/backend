@@ -31,3 +31,8 @@ func (r *DockingSpotRepository) UpdateDockingSpot(dock *model.DockingSpot) error
 func (r *DockingSpotRepository) DeleteDockingSpot(id uuid.UUID) error {
 	return r.db.Delete(&model.DockingSpot{}, "dock_id = ?", id).Error
 }
+func (r *DockingSpotRepository) ListDockingSpots(limit, offset int) ([]model.DockingSpot, error) {
+	var spots []model.DockingSpot
+	err := r.db.Limit(limit).Offset(offset).Find(&spots).Error
+	return spots, err
+}

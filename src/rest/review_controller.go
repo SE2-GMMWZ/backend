@@ -3,6 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
+	"backend/src/rest/shared"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -80,6 +81,10 @@ func (rc *reviewController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (rc *reviewController) List(c *gin.Context) {
+	shared.ListEntities(c, rc.reviewRepository.ListReviews)
+}
+
 func AddReviewRoutes(r *gin.Engine, reviewRepository *repository.ReviewRepository) {
 	rc := reviewController{reviewRepository: reviewRepository}
 
@@ -87,6 +92,7 @@ func AddReviewRoutes(r *gin.Engine, reviewRepository *repository.ReviewRepositor
 	{
 		reviews.POST("", rc.Create)
 		reviews.GET("/:id", rc.Get)
+		reviews.GET("/list", rc.List)
 		reviews.PUT("/:id", rc.Update)
 		reviews.DELETE("/:id", rc.Delete)
 	}

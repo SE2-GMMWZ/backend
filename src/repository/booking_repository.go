@@ -31,3 +31,9 @@ func (r *BookingRepository) UpdateBooking(booking *model.Booking) error {
 func (r *BookingRepository) DeleteBooking(id uuid.UUID) error {
 	return r.db.Delete(&model.Booking{}, "booking_id = ?", id).Error
 }
+
+func (r *BookingRepository) ListBookings(limit, offset int) ([]model.Booking, error) {
+	var bookings []model.Booking
+	err := r.db.Limit(limit).Offset(offset).Find(&bookings).Error
+	return bookings, err
+}

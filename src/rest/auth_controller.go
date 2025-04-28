@@ -4,6 +4,7 @@ import (
 	"backend/src/auth"
 	"backend/src/model"
 	"backend/src/repository"
+	"backend/src/rest/shared"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -80,6 +81,10 @@ func (am *authController) Login(c *gin.Context) {
 
 	c.SetCookie("token", token, 3600*24*30 /* one month */, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful."})
+}
+
+func (ac *authController) List(c *gin.Context) {
+	shared.ListWithQuery(c, ac.userRepository.ListUsers)
 }
 
 func (am *authController) Logout(c *gin.Context) {

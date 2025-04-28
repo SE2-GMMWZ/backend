@@ -3,6 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
+	"backend/src/rest/shared"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -80,6 +81,10 @@ func (cc *commentController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (cc *commentController) List(c *gin.Context) {
+	shared.ListEntities(c, cc.commentRepository.ListComments)
+}
+
 func AddCommentRoutes(r *gin.Engine, commentRepository *repository.CommentRepository) {
 	cc := commentController{commentRepository: commentRepository}
 
@@ -87,6 +92,7 @@ func AddCommentRoutes(r *gin.Engine, commentRepository *repository.CommentReposi
 	{
 		comments.POST("", cc.Create)
 		comments.GET("/:id", cc.Get)
+		comments.GET("/list", cc.List)
 		comments.PUT("/:id", cc.Update)
 		comments.DELETE("/:id", cc.Delete)
 	}

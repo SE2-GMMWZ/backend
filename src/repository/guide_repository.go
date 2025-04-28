@@ -31,3 +31,9 @@ func (r *GuideRepository) UpdateGuide(guide *model.Guide) error {
 func (r *GuideRepository) DeleteGuide(id uuid.UUID) error {
 	return r.db.Delete(&model.Guide{}, "guide_id = ?", id).Error
 }
+
+func (r *GuideRepository) ListGuides(limit, offset int) ([]model.Guide, error) {
+	var guides []model.Guide
+	err := r.db.Limit(limit).Offset(offset).Find(&guides).Error
+	return guides, err
+}

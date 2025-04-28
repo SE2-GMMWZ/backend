@@ -3,6 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
+	"backend/src/rest/shared"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -79,6 +80,9 @@ func (bc *bookingController) Delete(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+func (bc *bookingController) List(c *gin.Context) {
+	shared.ListEntities(c, bc.bookingRepository.ListBookings)
+}
 
 func AddBookingRoutes(r *gin.Engine, bookingRepository *repository.BookingRepository) {
 	bc := bookingController{bookingRepository: bookingRepository}
@@ -87,6 +91,7 @@ func AddBookingRoutes(r *gin.Engine, bookingRepository *repository.BookingReposi
 	{
 		bookings.POST("", bc.Create)
 		bookings.GET("/:id", bc.Get)
+		bookings.GET("/list", bc.List)
 		bookings.PUT("/:id", bc.Update)
 		bookings.DELETE("/:id", bc.Delete)
 	}

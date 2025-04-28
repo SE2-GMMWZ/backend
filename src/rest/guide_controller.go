@@ -3,6 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
+	"backend/src/rest/shared"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -80,6 +81,10 @@ func (gc *guideController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+func (gc *guideController) List(c *gin.Context) {
+	shared.ListEntities(c, gc.guideRepository.ListGuides)
+}
+
 func AddGuideRoutes(r *gin.Engine, guideRepository *repository.GuideRepository) {
 	gc := guideController{guideRepository: guideRepository}
 
@@ -87,6 +92,7 @@ func AddGuideRoutes(r *gin.Engine, guideRepository *repository.GuideRepository) 
 	{
 		guides.POST("", gc.Create)
 		guides.GET("/:id", gc.Get)
+		guides.GET("/list", gc.List)
 		guides.PUT("/:id", gc.Update)
 		guides.DELETE("/:id", gc.Delete)
 	}
