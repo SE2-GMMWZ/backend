@@ -2,6 +2,15 @@ package model
 
 import "github.com/google/uuid"
 
+type UserRole string
+
+const (
+	RoleAdmin     UserRole = "admin"
+	RoleEditor    UserRole = "editor"
+	RoleDockOwner UserRole = "dock_owner"
+	RoleSailor    UserRole = "sailor"
+)
+
 // User struct maps to the existing "users" table
 type User struct {
 	UserID      uuid.UUID `gorm:"column:user_id;primaryKey;type:uuid;default:uuid_generate_v4()" json:"user_id"`
@@ -10,5 +19,5 @@ type User struct {
 	Email       string    `gorm:"column:email;unique" json:"email"`
 	PhoneNumber *string   `gorm:"column:phone_number" json:"phone_number,omitempty"`
 	Password    string    `gorm:"column:password" json:"-"`
-	Role        string    `gorm:"column:role" json:"role"`
+	Role        UserRole  `gorm:"column:role" json:"role"`
 }

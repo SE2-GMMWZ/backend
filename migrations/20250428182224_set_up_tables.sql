@@ -10,7 +10,7 @@ CREATE TABLE users
     email        VARCHAR(255) NOT NULL UNIQUE,
     phone_number VARCHAR(20),
     password     VARCHAR(255) NOT NULL,
-    role         TEXT         NOT NULL CHECK (role IN ('user', 'admin', 'owner'))
+    role         TEXT         NOT NULL CHECK (role IN ('user', 'admin', 'dock_owner', 'sailor'))
 );
 
 CREATE TABLE port

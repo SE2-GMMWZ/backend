@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"backend/src/model"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"net/http"
 	"net/url"
 	"strings"
@@ -13,15 +15,18 @@ import (
 var jwtSecret = []byte("supersecretkey")
 
 type Claims struct {
-	Username string `json:"username"`
+	UserId uuid.UUID      `json:"userId"`
+	Role   model.UserRole `json:"role"`
+
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(email string) (string, error) {
+func GenerateJWT(userId uuid.UUID, role model.UserRole) (string, error) {
 	claims := &Claims{
-		Username: email,
+		UserId: userId,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 30)),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -53,7 +58,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-			c.Set("email", claims.Username)
+			c.Set("userId", claims.UserId)
+			c.Set("role", claims.Role)
 		} else {
 			c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/login?dest=%s", url.QueryEscape(c.Request.URL.Path)))
 			c.Abort()
@@ -74,11 +80,7 @@ func RedirectIfAuthenticated() gin.HandlerFunc {
 		})
 
 		if err == nil && token.Valid {
-			referrer := c.Request.Referer()
-			if referrer == "" {
-				referrer = "/"
-			}
-			c.Redirect(http.StatusTemporaryRedirect, referrer)
+			c.Status(202)
 			c.Abort()
 			return
 		}
