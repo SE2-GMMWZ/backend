@@ -43,6 +43,13 @@ func main() {
 
 	gormDb, err := gorm.Open(postgres.Open(dbString), &gorm.Config{})
 	userRepository := repository.NewUserRepository(gormDb)
+	bookingRepository := repository.NewBookingRepository(gormDb)
+	commentRepository := repository.NewCommentRepository(gormDb)
+	dockingSpotRepository := repository.NewDockingSpotRepository(gormDb)
+	guideRepository := repository.NewGuideRepository(gormDb)
+	notificationRepository := repository.NewNotificationRepository(gormDb)
+	portRepository := repository.NewPortRepository(gormDb)
+	reviewRepository := repository.NewReviewRepository(gormDb)
 
 	r := gin.Default()
 
@@ -60,6 +67,13 @@ func main() {
 
 	r.Static("/static", "static")
 	rest.AddAuthRoutes(r, userRepository)
+	rest.AddBookingRoutes(r, bookingRepository)
+	rest.AddCommentRoutes(r, commentRepository)
+	rest.AddDockingSpotRoutes(r, dockingSpotRepository)
+	rest.AddGuideRoutes(r, guideRepository)
+	rest.AddNotificationRoutes(r, notificationRepository)
+	rest.AddPortRoutes(r, portRepository)
+	rest.AddReviewRoutes(r, reviewRepository)
 
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
@@ -78,4 +92,3 @@ func runMigrations(db *sql.DB, migrationDir string) error {
 
 	return nil
 }
-

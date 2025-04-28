@@ -2,61 +2,54 @@ package repository
 
 import (
 	"backend/src/model"
-	"errors"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type UserRepositoryInterface interface {
-	CreateUser(user *model.User) error
-	GetUserByID(id uint) (*model.User, error)
-	GetUserByEmail(username string) (*model.User, error)
-}
-
 type UserRepository struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{DB: db}
+	return &UserRepository{db}
 }
 
 func (r *UserRepository) CreateUser(user *model.User) error {
-	var existingUser model.User
-	if err := r.DB.Where("email = ?", user.Email).First(&existingUser).Error; err == nil {
-		return errors.New("user with this username or email already exists")
-	}
-
-	if err := r.DB.Create(user).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return r.db.Create(user).Error
 }
 
-func (r *UserRepository) GetUserByEmail(username string) (*model.User, error) {
+func (r *UserRepository) GetUserByEmail(email string) (*model.User, error) {
 	var user model.User
-	if err := r.DB.Where("email = ?", username).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("user not found")
-		}
-		return nil, err
-	}
+	err := r.db.Where("email = ?", email).First(&user).Error
+	return &user, err
+}
 
-	return &user, nil
+func (r *UserRepository) GetUserByID(id uuid.UUID) (*model.User, error) {
+	var user model.User
+	err := r.db.First(&user, "user_id = ?", id).Error
+	return &user, err
 }
 
 func (r *UserRepository) UpdateUser(user *model.User) error {
-	var existingUser model.User
-	if err := r.DB.First(&existingUser, user.ID).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("user not found")
-		}
-		return err
+	return r.db.Save(user).Error
+}
+
+func (r *UserRepository) DeleteUser(id uuid.UUID) error {
+	return r.db.Delete(&model.User{}, "user_id = ?", id).Error
+}
+
+func (r *UserRepository) ListUsers(limit, offset int, query string) ([]model.User, error) {
+	var users []model.User
+	db := r.db.Model(&model.User{})
+
+	if query != "" {
+		likePattern := "%" + query + "%"
+		db = db.Where(
+			"email ILIKE ? OR name ILIKE ? OR surname ILIKE ? OR phone_number ILIKE ?",
+			likePattern, likePattern, likePattern, likePattern,
+		)
 	}
 
-	if err := r.DB.Save(user).Error; err != nil {
-		return err
-	}
-
-	return nil
+	err := db.Limit(limit).Offset(offset).Find(&users).Error
+	return users, err
 }

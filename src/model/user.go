@@ -1,11 +1,23 @@
 package model
 
+import "github.com/google/uuid"
+
+type UserRole string
+
+const (
+	RoleAdmin     UserRole = "admin"
+	RoleEditor    UserRole = "editor"
+	RoleDockOwner UserRole = "dock_owner"
+	RoleSailor    UserRole = "sailor"
+)
+
 // User struct maps to the existing "users" table
 type User struct {
-	ID               uint   `gorm:"column:id;primaryKey" json:"id"`
-	Username         string `gorm:"column:username" json:"username"`
-	Email            string `gorm:"column:email" json:"email"`
-	Password         string `gorm:"column:password" json:"password"`
-	Verified         bool   `gorm:"column:verified" json:"verified"`
-	VerificationCode string `gorm:"column:verification_code" json:"verification_code"`
+	UserID      uuid.UUID `gorm:"column:user_id;primaryKey;type:uuid;default:uuid_generate_v4()" json:"user_id"`
+	Name        string    `gorm:"column:name" json:"name"`
+	Surname     string    `gorm:"column:surname" json:"surname"`
+	Email       string    `gorm:"column:email;unique" json:"email"`
+	PhoneNumber *string   `gorm:"column:phone_number" json:"phone_number,omitempty"`
+	Password    string    `gorm:"column:password" json:"-"`
+	Role        UserRole  `gorm:"column:role" json:"role"`
 }
