@@ -5,26 +5,30 @@ import (
 	"backend/src/rest"
 	"database/sql"
 	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
-	_ "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 	"os"
+	"strings"
+	"time"
 )
-
-//TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
 
 func main() {
 
 	dbString := os.Getenv("GOOSE_DBSTRING")
 	migrationDir := os.Getenv("GOOSE_MIGRATION_DIR")
+	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
 
 	if dbString == "" || migrationDir == "" {
 		log.Fatalf("Missing required environment variables: GOOSE_DBSTRING or GOOSE_MIGRATION_DIR")
+	}
+
+	if allowedOrigins == "" {
+		log.Fatalf("Missing required environment variable: ALLOWED_ORIGINS")
 	}
 
 	db, err := sql.Open("postgres", dbString)
@@ -41,9 +45,22 @@ func main() {
 	userRepository := repository.NewUserRepository(gormDb)
 
 	r := gin.Default()
-	r.Static("/static", "static")
 
+	// Split ALLOWED_ORIGINS into a slice
+	origins := strings.Split(allowedOrigins, ",")
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     origins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	r.Static("/static", "static")
 	rest.AddAuthRoutes(r, userRepository)
+
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
@@ -61,3 +78,4 @@ func runMigrations(db *sql.DB, migrationDir string) error {
 
 	return nil
 }
+
