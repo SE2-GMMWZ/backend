@@ -38,15 +38,16 @@ func (r *UserRepository) DeleteUser(id uuid.UUID) error {
 	return r.db.Delete(&model.User{}, "user_id = ?", id).Error
 }
 
-func (r *UserRepository) ListUsers(limit, offset int, query map[string]string) ([]model.User, error) {
+func (r *UserRepository) ListUsers(limit, offset int, query string) ([]model.User, error) {
 	var users []model.User
 	db := r.db.Model(&model.User{})
 
-	if email, ok := query["email"]; ok && email != "" {
-		db = db.Where("email ILIKE ?", "%"+email+"%")
-	}
-	if phone, ok := query["phone_number"]; ok && phone != "" {
-		db = db.Where("phone_number ILIKE ?", "%"+phone+"%")
+	if query != "" {
+		likePattern := "%" + query + "%"
+		db = db.Where(
+			"email ILIKE ? OR name ILIKE ? OR surname ILIKE ? OR phone_number ILIKE ?",
+			likePattern, likePattern, likePattern, likePattern,
+		)
 	}
 
 	err := db.Limit(limit).Offset(offset).Find(&users).Error
