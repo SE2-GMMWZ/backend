@@ -2,12 +2,10 @@ package auth
 
 import (
 	"backend/src/model"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
@@ -41,7 +39,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		if authHeader == "" {
-			c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/login?dest=%s", url.QueryEscape(c.Request.URL.Path)))
+			c.Status(http.StatusUnauthorized)
 			c.Abort()
 			return
 		}
@@ -52,7 +50,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/login?dest=%s", url.QueryEscape(c.Request.URL.Path)))
+			c.Status(http.StatusUnauthorized)
 			c.Abort()
 			return
 		}
@@ -61,7 +59,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Set("userId", claims.UserId)
 			c.Set("role", claims.Role)
 		} else {
-			c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/login?dest=%s", url.QueryEscape(c.Request.URL.Path)))
+			c.Status(http.StatusUnauthorized)
 			c.Abort()
 			return
 		}

@@ -151,6 +151,6 @@ func AddAuthRoutes(r *gin.Engine, userRepository *repository.UserRepository) {
 
 	r.POST("/signup", auth.RedirectIfAuthenticated(), am.Signup)
 	r.POST("/login", auth.RedirectIfAuthenticated(), am.Login)
-	r.GET("/user-info", auth.AuthMiddleware(), am.Login)
+	r.GET("/user-info", auth.AuthMiddleware(), am.UserInfo)
 	r.POST("/logout", am.Logout)
 }
