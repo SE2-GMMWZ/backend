@@ -5,6 +5,7 @@ import (
 	"backend/src/model"
 	"backend/src/repository"
 	"backend/src/rest/shared"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -14,6 +15,15 @@ import (
 
 type authController struct {
 	userRepository *repository.UserRepository
+}
+
+func setAuthCookie(c *gin.Context, token string, maxAge int) {
+	expr := fmt.Sprintf(
+		"token=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None",
+		token,
+		maxAge,
+	)
+	c.Writer.Header().Add("Set-Cookie", expr)
 }
 
 func (am *authController) Signup(c *gin.Context) {
@@ -57,6 +67,7 @@ func (am *authController) Signup(c *gin.Context) {
 	user, err := am.userRepository.GetUserByEmail(credentials.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error."})
+		return
 	}
 
 	token, err := auth.GenerateJWT(user.UserID, user.Role)
@@ -64,7 +75,9 @@ func (am *authController) Signup(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token."})
 		return
 	}
-	c.SetCookie("token", token, 3600*24*30 /* one month */, "/", "localhost", false, true)
+
+	setAuthCookie(c, token, 3600*24*30)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful.", "user": gin.H{
 		"id":      user.UserID,
 		"email":   user.Email,
@@ -106,7 +119,8 @@ func (am *authController) Login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("token", token, 3600*24*30 /* one month */, "/", "localhost", false, true)
+	setAuthCookie(c, token, 3600*24*30)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful.", "user": gin.H{
 		"id":      user.UserID,
 		"email":   user.Email,
@@ -122,7 +136,8 @@ func (ac *authController) List(c *gin.Context) {
 }
 
 func (am *authController) Logout(c *gin.Context) {
-	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+	expr := "token=; Max-Age=-1; Path=/; Secure; HttpOnly; SameSite=None"
+	c.Writer.Header().Add("Set-Cookie", expr)
 	c.Status(http.StatusOK)
 }
 
@@ -130,10 +145,12 @@ func (am *authController) UserInfo(c *gin.Context) {
 	userId, present := c.Get("userId")
 	if !present {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error."})
+		return
 	}
 	user, err := am.userRepository.GetUserByID(userId.(uuid.UUID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error."})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"user": gin.H{
 		"id":      user.UserID,
@@ -143,7 +160,6 @@ func (am *authController) UserInfo(c *gin.Context) {
 		"phone":   user.PhoneNumber,
 		"role":    user.Role,
 	}})
-
 }
 
 func AddAuthRoutes(r *gin.Engine, userRepository *repository.UserRepository) {
@@ -155,3 +171,4 @@ func AddAuthRoutes(r *gin.Engine, userRepository *repository.UserRepository) {
 	r.GET("/users/list", am.List)
 	r.POST("/logout", am.Logout)
 }
+
