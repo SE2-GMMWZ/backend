@@ -13,6 +13,17 @@ type notificationController struct {
 	notificationRepository *repository.NotificationRepository
 }
 
+// Create godoc
+// @Summary      Create notification
+// @Description  Creates a new notification
+// @Tags         Notifications
+// @Accept       json
+// @Produce      json
+// @Param        body  body      model.Notification  true  "Notification to create"
+// @Success      201   {object}  model.Notification
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /notifications [post]
 func (nc *notificationController) Create(c *gin.Context) {
 	var notification model.Notification
 	if err := c.ShouldBindJSON(&notification); err != nil {
@@ -28,6 +39,16 @@ func (nc *notificationController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, notification)
 }
 
+// Get godoc
+// @Summary      Get notification
+// @Description  Returns a single notification by its UUID
+// @Tags         Notifications
+// @Produce      json
+// @Param        id   path      string               true  "Notification UUID"
+// @Success      200  {object}  model.Notification
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /notifications/{id} [get]
 func (nc *notificationController) Get(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -44,6 +65,18 @@ func (nc *notificationController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, notification)
 }
 
+// Update godoc
+// @Summary      Update notification
+// @Description  Updates a notification by its UUID
+// @Tags         Notifications
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string               true  "Notification UUID"
+// @Param        body  body      model.Notification   true  "Notification data to update"
+// @Success      200   {object}  model.Notification
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /notifications/{id} [put]
 func (nc *notificationController) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -66,6 +99,16 @@ func (nc *notificationController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, notification)
 }
 
+// Delete godoc
+// @Summary      Delete notification
+// @Description  Deletes a notification by its UUID
+// @Tags         Notifications
+// @Produce      json
+// @Param        id   path      string  true  "Notification UUID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /notifications/{id} [delete]
 func (nc *notificationController) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -81,6 +124,15 @@ func (nc *notificationController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// List godoc
+// @Summary      List notifications
+// @Description  Returns paginated list of notifications; supports query parameters forwarded to repository
+// @Tags         Notifications
+// @Produce      json
+// @Param        page   query     int false "Page number"
+// @Param        limit  query     int false "Items per page"
+// @Success      200    {object}  map[string]interface{}
+// @Router       /notifications/list [get]
 func (nc *notificationController) List(c *gin.Context) {
 	shared.ListEntities(c, nc.notificationRepository.ListNotifications)
 }
@@ -92,7 +144,7 @@ func AddNotificationRoutes(r *gin.Engine, notificationRepository *repository.Not
 	{
 		notifications.POST("", nc.Create)
 		notifications.GET("/:id", nc.Get)
-		notifications.GET("/list", nc.List) // This line adds the List route
+		notifications.GET("/list", nc.List)
 		notifications.PUT("/:id", nc.Update)
 		notifications.DELETE("/:id", nc.Delete)
 	}

@@ -13,6 +13,17 @@ type bookingController struct {
 	bookingRepository *repository.BookingRepository
 }
 
+// Create godoc
+// @Summary      Create booking
+// @Description  Creates a new booking
+// @Tags         Bookings
+// @Accept       json
+// @Produce      json
+// @Param        body  body      model.Booking  true  "Booking to create"
+// @Success      201   {object}  model.Booking
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /bookings [post]
 func (bc *bookingController) Create(c *gin.Context) {
 	var booking model.Booking
 	if err := c.ShouldBindJSON(&booking); err != nil {
@@ -28,6 +39,16 @@ func (bc *bookingController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, booking)
 }
 
+// Get godoc
+// @Summary      Get booking
+// @Description  Returns a single booking by its UUID
+// @Tags         Bookings
+// @Produce      json
+// @Param        id   path      string        true  "Booking UUID"
+// @Success      200  {object}  model.Booking
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /bookings/{id} [get]
 func (bc *bookingController) Get(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -44,6 +65,18 @@ func (bc *bookingController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, booking)
 }
 
+// Update godoc
+// @Summary      Update booking
+// @Description  Updates a booking by its UUID
+// @Tags         Bookings
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string        true  "Booking UUID"
+// @Param        body  body      model.Booking true  "Booking data to update"
+// @Success      200   {object}  model.Booking
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /bookings/{id} [put]
 func (bc *bookingController) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -66,6 +99,16 @@ func (bc *bookingController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, booking)
 }
 
+// Delete godoc
+// @Summary      Delete booking
+// @Description  Deletes a booking by its UUID
+// @Tags         Bookings
+// @Produce      json
+// @Param        id   path      string  true  "Booking UUID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /bookings/{id} [delete]
 func (bc *bookingController) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -80,6 +123,16 @@ func (bc *bookingController) Delete(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+// List godoc
+// @Summary      List bookings
+// @Description  Returns paginated list of bookings; supports query parameters forwarded to repository
+// @Tags         Bookings
+// @Produce      json
+// @Param        page   query     int false "Page number"
+// @Param        limit  query     int false "Items per page"
+// @Success      200    {object}  map[string]interface{}
+// @Router       /bookings/list [get]
 func (bc *bookingController) List(c *gin.Context) {
 	shared.ListEntities(c, bc.bookingRepository.ListBookings)
 }
