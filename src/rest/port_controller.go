@@ -13,6 +13,17 @@ type portController struct {
 	portRepository *repository.PortRepository
 }
 
+// Create godoc
+// @Summary      Create port
+// @Description  Creates a new port
+// @Tags         Ports
+// @Accept       json
+// @Produce      json
+// @Param        body  body      model.Port  true  "Port to create"
+// @Success      201   {object}  model.Port
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /ports [post]
 func (pc *portController) Create(c *gin.Context) {
 	var port model.Port
 	if err := c.ShouldBindJSON(&port); err != nil {
@@ -28,6 +39,16 @@ func (pc *portController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, port)
 }
 
+// Get godoc
+// @Summary      Get port
+// @Description  Returns a single port by its UUID
+// @Tags         Ports
+// @Produce      json
+// @Param        id   path      string      true  "Port UUID"
+// @Success      200  {object}  model.Port
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /ports/{id} [get]
 func (pc *portController) Get(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -44,6 +65,18 @@ func (pc *portController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, port)
 }
 
+// Update godoc
+// @Summary      Update port
+// @Description  Updates a port by its UUID
+// @Tags         Ports
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string      true  "Port UUID"
+// @Param        body  body      model.Port  true  "Port data to update"
+// @Success      200   {object}  model.Port
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /ports/{id} [put]
 func (pc *portController) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -66,6 +99,16 @@ func (pc *portController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, port)
 }
 
+// Delete godoc
+// @Summary      Delete port
+// @Description  Deletes a port by its UUID
+// @Tags         Ports
+// @Produce      json
+// @Param        id   path      string  true  "Port UUID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /ports/{id} [delete]
 func (pc *portController) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -81,6 +124,15 @@ func (pc *portController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// List godoc
+// @Summary      List ports
+// @Description  Returns paginated list of ports; supports query parameters forwarded to repository
+// @Tags         Ports
+// @Produce      json
+// @Param        page   query     int false "Page number"
+// @Param        limit  query     int false "Items per page"
+// @Success      200    {object}  map[string]interface{}
+// @Router       /ports/list [get]
 func (pc *portController) List(c *gin.Context) {
 	shared.ListEntities(c, pc.portRepository.ListPorts)
 }

@@ -13,6 +13,17 @@ type dockingSpotController struct {
 	dockingSpotRepository *repository.DockingSpotRepository
 }
 
+// Create godoc
+// @Summary      Create docking-spot
+// @Description  Creates a new docking spot
+// @Tags         DockingSpots
+// @Accept       json
+// @Produce      json
+// @Param        body  body      model.DockingSpot  true  "Docking-spot to create"
+// @Success      201   {object}  model.DockingSpot
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /docking-spots [post]
 func (dsc *dockingSpotController) Create(c *gin.Context) {
 	var spot model.DockingSpot
 	if err := c.ShouldBindJSON(&spot); err != nil {
@@ -28,6 +39,16 @@ func (dsc *dockingSpotController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, spot)
 }
 
+// Get godoc
+// @Summary      Get docking-spot
+// @Description  Returns a single docking spot by its UUID
+// @Tags         DockingSpots
+// @Produce      json
+// @Param        id   path      string            true  "Docking-spot UUID"
+// @Success      200  {object}  model.DockingSpot
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /docking-spots/{id} [get]
 func (dsc *dockingSpotController) Get(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -44,6 +65,18 @@ func (dsc *dockingSpotController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, spot)
 }
 
+// Update godoc
+// @Summary      Update docking-spot
+// @Description  Updates a docking spot by its UUID
+// @Tags         DockingSpots
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string            true  "Docking-spot UUID"
+// @Param        body  body      model.DockingSpot true  "Docking-spot data to update"
+// @Success      200   {object}  model.DockingSpot
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /docking-spots/{id} [put]
 func (dsc *dockingSpotController) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -66,6 +99,16 @@ func (dsc *dockingSpotController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, spot)
 }
 
+// Delete godoc
+// @Summary      Delete docking-spot
+// @Description  Deletes a docking spot by its UUID
+// @Tags         DockingSpots
+// @Produce      json
+// @Param        id   path      string  true  "Docking-spot UUID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /docking-spots/{id} [delete]
 func (dsc *dockingSpotController) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -81,6 +124,15 @@ func (dsc *dockingSpotController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// List godoc
+// @Summary      List docking-spots
+// @Description  Returns paginated list of docking spots; supports query parameters forwarded to repository
+// @Tags         DockingSpots
+// @Produce      json
+// @Param        page   query     int false "Page number"
+// @Param        limit  query     int false "Items per page"
+// @Success      200    {object}  map[string]interface{}
+// @Router       /docking-spots/list [get]
 func (dsc *dockingSpotController) List(c *gin.Context) {
 	shared.ListEntities(c, dsc.dockingSpotRepository.ListDockingSpots)
 }
@@ -92,7 +144,7 @@ func AddDockingSpotRoutes(r *gin.Engine, dockingSpotRepository *repository.Docki
 	{
 		dockingSpots.POST("", dsc.Create)
 		dockingSpots.GET("/:id", dsc.Get)
-		dockingSpots.GET("/list", dsc.List) // This line adds the List route
+		dockingSpots.GET("/list", dsc.List)
 		dockingSpots.PUT("/:id", dsc.Update)
 		dockingSpots.DELETE("/:id", dsc.Delete)
 	}

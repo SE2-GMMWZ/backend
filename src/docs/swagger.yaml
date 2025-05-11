@@ -1,0 +1,1488 @@
+definitions:
+  model.Booking:
+    properties:
+      booking_id:
+        type: string
+      dock_id:
+        type: string
+      end_date:
+        type: string
+      payment_method:
+        type: string
+      payment_status:
+        type: string
+      people:
+        type: integer
+      sailor_id:
+        type: string
+      start_date:
+        type: string
+    type: object
+  model.Comment:
+    properties:
+      comment_id:
+        type: string
+      content:
+        type: string
+      guide_id:
+        type: string
+      timestamp:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.DockingSpot:
+    properties:
+      availability:
+        description: '''available'' or ''unavailable'''
+        type: string
+      description:
+        type: string
+      dock_id:
+        type: string
+      location:
+        description: latitude, longitude, town
+        items:
+          type: integer
+        type: array
+      name:
+        type: string
+      owner_id:
+        type: string
+      price_per_night:
+        type: number
+      price_per_person:
+        type: number
+      services:
+        type: string
+      services_pricing:
+        type: number
+    type: object
+  model.Guide:
+    properties:
+      author_id:
+        type: string
+      content:
+        type: string
+      guide_id:
+        type: string
+      images:
+        items:
+          type: integer
+        type: array
+      is_approved:
+        type: boolean
+      links:
+        items:
+          type: integer
+        type: array
+      location:
+        description: latitude, longitude
+        items:
+          type: integer
+        type: array
+      publication_date:
+        type: string
+      title:
+        type: string
+    type: object
+  model.Notification:
+    properties:
+      message:
+        type: string
+      notification_id:
+        type: string
+      timestamp:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.Port:
+    properties:
+      description:
+        type: string
+      docking_spots:
+        items:
+          type: integer
+        type: array
+      is_approved:
+        type: boolean
+      location:
+        description: latitude, longitude, town
+        items:
+          type: integer
+        type: array
+      name:
+        type: string
+      owner_id:
+        type: string
+      port_id:
+        type: string
+      services:
+        items:
+          type: integer
+        type: array
+    type: object
+  model.Review:
+    properties:
+      comment:
+        type: string
+      date_of_review:
+        type: string
+      rating:
+        type: number
+      review_id:
+        type: string
+      reviewer_id:
+        type: string
+    type: object
+  model.User:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      phone_number:
+        type: string
+      role:
+        $ref: '#/definitions/model.UserRole'
+      surname:
+        type: string
+      user_id:
+        type: string
+    type: object
+  model.UserRole:
+    enum:
+    - admin
+    - editor
+    - dock_owner
+    - sailor
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleEditor
+    - RoleDockOwner
+    - RoleSailor
+info:
+  contact: {}
+paths:
+  /bookings:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new booking
+      parameters:
+      - description: Booking to create
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Booking'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create booking
+      tags:
+      - Bookings
+  /bookings/{id}:
+    delete:
+      description: Deletes a booking by its UUID
+      parameters:
+      - description: Booking UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete booking
+      tags:
+      - Bookings
+    get:
+      description: Returns a single booking by its UUID
+      parameters:
+      - description: Booking UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get booking
+      tags:
+      - Bookings
+    put:
+      consumes:
+      - application/json
+      description: Updates a booking by its UUID
+      parameters:
+      - description: Booking UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Booking data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Booking'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update booking
+      tags:
+      - Bookings
+  /bookings/list:
+    get:
+      description: Returns paginated list of bookings; supports query parameters forwarded
+        to repository
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List bookings
+      tags:
+      - Bookings
+  /comments:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new comment
+      parameters:
+      - description: Comment to create
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Comment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create comment
+      tags:
+      - Comments
+  /comments/{id}:
+    delete:
+      description: Deletes a comment by its UUID
+      parameters:
+      - description: Comment UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete comment
+      tags:
+      - Comments
+    get:
+      description: Returns a single comment by its UUID
+      parameters:
+      - description: Comment UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get comment
+      tags:
+      - Comments
+    put:
+      consumes:
+      - application/json
+      description: Updates a comment by its UUID
+      parameters:
+      - description: Comment UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Comment data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update comment
+      tags:
+      - Comments
+  /comments/list:
+    get:
+      description: Returns paginated list of comments; supports query parameters forwarded
+        to repository
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List comments
+      tags:
+      - Comments
+  /docking-spots:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new docking spot
+      parameters:
+      - description: Docking-spot to create
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.DockingSpot'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.DockingSpot'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create docking-spot
+      tags:
+      - DockingSpots
+  /docking-spots/{id}:
+    delete:
+      description: Deletes a docking spot by its UUID
+      parameters:
+      - description: Docking-spot UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete docking-spot
+      tags:
+      - DockingSpots
+    get:
+      description: Returns a single docking spot by its UUID
+      parameters:
+      - description: Docking-spot UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.DockingSpot'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get docking-spot
+      tags:
+      - DockingSpots
+    put:
+      consumes:
+      - application/json
+      description: Updates a docking spot by its UUID
+      parameters:
+      - description: Docking-spot UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Docking-spot data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.DockingSpot'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.DockingSpot'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update docking-spot
+      tags:
+      - DockingSpots
+  /docking-spots/list:
+    get:
+      description: Returns paginated list of docking spots; supports query parameters
+        forwarded to repository
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List docking-spots
+      tags:
+      - DockingSpots
+  /guides:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new guide
+      parameters:
+      - description: Guide to create
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Guide'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Guide'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create guide
+      tags:
+      - Guides
+  /guides/{id}:
+    delete:
+      description: Deletes a guide by its UUID
+      parameters:
+      - description: Guide UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete guide
+      tags:
+      - Guides
+    get:
+      description: Returns a single guide by its UUID
+      parameters:
+      - description: Guide UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Guide'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get guide
+      tags:
+      - Guides
+    put:
+      consumes:
+      - application/json
+      description: Updates a guide by its UUID
+      parameters:
+      - description: Guide UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Guide data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Guide'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Guide'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update guide
+      tags:
+      - Guides
+  /guides/list:
+    get:
+      description: Returns paginated list of guides; supports query parameters forwarded
+        to repository
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List guides
+      tags:
+      - Guides
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns JWT cookie
+      parameters:
+      - description: User login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login
+      tags:
+      - Auth
+  /logout:
+    post:
+      description: Clears authentication cookie
+      responses:
+        "200":
+          description: Successfully logged out
+      summary: Logout
+      tags:
+      - Auth
+  /notifications:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new notification
+      parameters:
+      - description: Notification to create
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Notification'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Notification'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create notification
+      tags:
+      - Notifications
+  /notifications/{id}:
+    delete:
+      description: Deletes a notification by its UUID
+      parameters:
+      - description: Notification UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete notification
+      tags:
+      - Notifications
+    get:
+      description: Returns a single notification by its UUID
+      parameters:
+      - description: Notification UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Notification'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get notification
+      tags:
+      - Notifications
+    put:
+      consumes:
+      - application/json
+      description: Updates a notification by its UUID
+      parameters:
+      - description: Notification UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Notification data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Notification'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Notification'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update notification
+      tags:
+      - Notifications
+  /notifications/list:
+    get:
+      description: Returns paginated list of notifications; supports query parameters
+        forwarded to repository
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List notifications
+      tags:
+      - Notifications
+  /ports:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new port
+      parameters:
+      - description: Port to create
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Port'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Port'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create port
+      tags:
+      - Ports
+  /ports/{id}:
+    delete:
+      description: Deletes a port by its UUID
+      parameters:
+      - description: Port UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete port
+      tags:
+      - Ports
+    get:
+      description: Returns a single port by its UUID
+      parameters:
+      - description: Port UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Port'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get port
+      tags:
+      - Ports
+    put:
+      consumes:
+      - application/json
+      description: Updates a port by its UUID
+      parameters:
+      - description: Port UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Port data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Port'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Port'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update port
+      tags:
+      - Ports
+  /ports/list:
+    get:
+      description: Returns paginated list of ports; supports query parameters forwarded
+        to repository
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List ports
+      tags:
+      - Ports
+  /reviews:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new review
+      parameters:
+      - description: Review to create
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Review'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Review'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create review
+      tags:
+      - Reviews
+  /reviews/{id}:
+    delete:
+      description: Deletes a review by its UUID
+      parameters:
+      - description: Review UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete review
+      tags:
+      - Reviews
+    get:
+      description: Returns a single review by its UUID
+      parameters:
+      - description: Review UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Review'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get review
+      tags:
+      - Reviews
+    put:
+      consumes:
+      - application/json
+      description: Updates a review by its UUID
+      parameters:
+      - description: Review UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Review data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.Review'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Review'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update review
+      tags:
+      - Reviews
+  /reviews/list:
+    get:
+      description: Returns paginated list of reviews; supports query parameters forwarded
+        to repository
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List reviews
+      tags:
+      - Reviews
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user and sets JWT cookie
+      parameters:
+      - description: User sign-up credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Sign-up
+      tags:
+      - Auth
+  /user-info:
+    get:
+      description: Returns information about the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Current user info
+      tags:
+      - Auth
+  /users/{id}:
+    delete:
+      description: Deletes a user by its UUID
+      parameters:
+      - description: User UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete user
+      tags:
+      - Users
+    get:
+      description: Returns a single user by its UUID
+      parameters:
+      - description: User UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Updates a user by its UUID
+      parameters:
+      - description: User UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User data to update
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update user
+      tags:
+      - Users
+  /users/list:
+    get:
+      description: Returns paginated list of users; supports query parameters forwarded
+        to repository
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+      summary: List users
+      tags:
+      - Users
+swagger: "2.0"

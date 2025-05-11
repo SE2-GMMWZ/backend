@@ -13,6 +13,17 @@ type commentController struct {
 	commentRepository *repository.CommentRepository
 }
 
+// Create godoc
+// @Summary      Create comment
+// @Description  Creates a new comment
+// @Tags         Comments
+// @Accept       json
+// @Produce      json
+// @Param        body  body      model.Comment  true  "Comment to create"
+// @Success      201   {object}  model.Comment
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /comments [post]
 func (cc *commentController) Create(c *gin.Context) {
 	var comment model.Comment
 	if err := c.ShouldBindJSON(&comment); err != nil {
@@ -28,6 +39,16 @@ func (cc *commentController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, comment)
 }
 
+// Get godoc
+// @Summary      Get comment
+// @Description  Returns a single comment by its UUID
+// @Tags         Comments
+// @Produce      json
+// @Param        id   path      string        true  "Comment UUID"
+// @Success      200  {object}  model.Comment
+// @Failure      400  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Router       /comments/{id} [get]
 func (cc *commentController) Get(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -44,6 +65,18 @@ func (cc *commentController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, comment)
 }
 
+// Update godoc
+// @Summary      Update comment
+// @Description  Updates a comment by its UUID
+// @Tags         Comments
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string        true  "Comment UUID"
+// @Param        body  body      model.Comment true  "Comment data to update"
+// @Success      200   {object}  model.Comment
+// @Failure      400   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Router       /comments/{id} [put]
 func (cc *commentController) Update(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -66,6 +99,16 @@ func (cc *commentController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, comment)
 }
 
+// Delete godoc
+// @Summary      Delete comment
+// @Description  Deletes a comment by its UUID
+// @Tags         Comments
+// @Produce      json
+// @Param        id   path      string  true  "Comment UUID"
+// @Success      204  "No Content"
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /comments/{id} [delete]
 func (cc *commentController) Delete(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -81,6 +124,15 @@ func (cc *commentController) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// List godoc
+// @Summary      List comments
+// @Description  Returns paginated list of comments; supports query parameters forwarded to repository
+// @Tags         Comments
+// @Produce      json
+// @Param        page   query     int false "Page number"
+// @Param        limit  query     int false "Items per page"
+// @Success      200    {object}  map[string]interface{}
+// @Router       /comments/list [get]
 func (cc *commentController) List(c *gin.Context) {
 	shared.ListEntities(c, cc.commentRepository.ListComments)
 }

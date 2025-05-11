@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "backend/src/docs"
 	"backend/src/repository"
 	"backend/src/rest"
 	"database/sql"
@@ -9,6 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -64,6 +67,8 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.Static("/static", "static")
 	rest.AddAuthRoutes(r, userRepository)
