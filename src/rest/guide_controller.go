@@ -129,12 +129,14 @@ func (gc *guideController) Delete(c *gin.Context) {
 // @Description  Returns paginated list of guides; supports query parameters forwarded to repository
 // @Tags         Guides
 // @Produce      json
-// @Param        page   query     int false "Page number"
-// @Param        limit  query     int false "Items per page"
-// @Success      200    {object}  map[string]interface{}
+// @Param        title        query     string false "Filter by title (partial match)"
+// @Param        author_id    query     string false "Filter by author UUID"
+// @Param        is_approved  query     bool   false "Filter by approval status"
+// @Param        limit        query     int    false "Items per page"
+// @Success      200    {object}  []model.Guide
 // @Router       /guides/list [get]
 func (gc *guideController) List(c *gin.Context) {
-	shared.ListEntities(c, gc.guideRepository.ListGuides)
+	shared.ListWithQuery(c, gc.guideRepository.ListGuides)
 }
 
 func AddGuideRoutes(r *gin.Engine, guideRepository *repository.GuideRepository) {

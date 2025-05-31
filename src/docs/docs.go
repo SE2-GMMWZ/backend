@@ -79,9 +79,27 @@ const docTemplate = `{
                 "summary": "List bookings",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
+                        "type": "string",
+                        "description": "Filter by Sailor UUID",
+                        "name": "sailor_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Dock UUID",
+                        "name": "dock_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by payment status",
+                        "name": "payment_status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by payment method",
+                        "name": "payment_method",
                         "in": "query"
                     },
                     {
@@ -95,8 +113,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Booking"
+                            }
                         }
                     }
                 }
@@ -312,9 +332,21 @@ const docTemplate = `{
                 "summary": "List comments",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
+                        "type": "string",
+                        "description": "Filter by Guide UUID",
+                        "name": "guide_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by User UUID",
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by content (substring match)",
+                        "name": "content",
                         "in": "query"
                     },
                     {
@@ -328,8 +360,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Comment"
+                            }
                         }
                     }
                 }
@@ -545,9 +579,21 @@ const docTemplate = `{
                 "summary": "List docking-spots",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
+                        "type": "string",
+                        "description": "Filter by docking spot name (partial match)",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by owner UUID",
+                        "name": "owner_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by availability ('available' or 'unavailable')",
+                        "name": "availability",
                         "in": "query"
                     },
                     {
@@ -561,8 +607,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.DockingSpot"
+                            }
                         }
                     }
                 }
@@ -778,9 +826,21 @@ const docTemplate = `{
                 "summary": "List guides",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
+                        "type": "string",
+                        "description": "Filter by title (partial match)",
+                        "name": "title",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by author UUID",
+                        "name": "author_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by approval status",
+                        "name": "is_approved",
                         "in": "query"
                     },
                     {
@@ -794,8 +854,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Guide"
+                            }
                         }
                     }
                 }
@@ -1086,9 +1148,15 @@ const docTemplate = `{
                 "summary": "List notifications",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
+                        "type": "string",
+                        "description": "Filter by User UUID",
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by message content (substring match)",
+                        "name": "message",
                         "in": "query"
                     },
                     {
@@ -1102,8 +1170,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Notification"
+                            }
                         }
                     }
                 }
@@ -1319,9 +1389,21 @@ const docTemplate = `{
                 "summary": "List ports",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
+                        "type": "string",
+                        "description": "Filter by port name (partial match)",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by owner UUID",
+                        "name": "owner_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by approval status",
+                        "name": "is_approved",
                         "in": "query"
                     },
                     {
@@ -1335,8 +1417,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Port"
+                            }
                         }
                     }
                 }
@@ -1552,9 +1636,21 @@ const docTemplate = `{
                 "summary": "List reviews",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Page number",
-                        "name": "page",
+                        "type": "string",
+                        "description": "Filter by Reviewer UUID",
+                        "name": "reviewer_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Minimum rating",
+                        "name": "rating",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Text search in comment",
+                        "name": "comment",
                         "in": "query"
                     },
                     {
@@ -1568,8 +1664,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Review"
+                            }
                         }
                     }
                 }
@@ -2068,10 +2166,7 @@ const docTemplate = `{
                 },
                 "location": {
                     "description": "latitude, longitude, town",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "object"
                 },
                 "name": {
                     "type": "string"
@@ -2106,26 +2201,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "images": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "object"
                 },
                 "is_approved": {
                     "type": "boolean"
                 },
                 "links": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "object"
                 },
                 "location": {
                     "description": "latitude, longitude",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "object"
                 },
                 "publication_date": {
                     "type": "string"
@@ -2159,20 +2245,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "docking_spots": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "object"
                 },
                 "is_approved": {
                     "type": "boolean"
                 },
                 "location": {
                     "description": "latitude, longitude, town",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "object"
                 },
                 "name": {
                     "type": "string"
@@ -2184,10 +2264,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "services": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "object"
                 }
             }
         },
@@ -2238,7 +2315,7 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "admin",
-                "editor",
+                "user",
                 "dock_owner",
                 "sailor"
             ],

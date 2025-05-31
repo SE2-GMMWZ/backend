@@ -129,12 +129,14 @@ func (cc *commentController) Delete(c *gin.Context) {
 // @Description  Returns paginated list of comments; supports query parameters forwarded to repository
 // @Tags         Comments
 // @Produce      json
-// @Param        page   query     int false "Page number"
-// @Param        limit  query     int false "Items per page"
-// @Success      200    {object}  map[string]interface{}
+// @Param        guide_id  query     string false "Filter by Guide UUID"
+// @Param        user_id   query     string false "Filter by User UUID"
+// @Param        content   query     string false "Filter by content (substring match)"
+// @Param        limit     query     int    false "Items per page"
+// @Success      200    {object}  []model.Comment
 // @Router       /comments/list [get]
 func (cc *commentController) List(c *gin.Context) {
-	shared.ListEntities(c, cc.commentRepository.ListComments)
+	shared.ListWithQuery(c, cc.commentRepository.ListComments)
 }
 
 func AddCommentRoutes(r *gin.Engine, commentRepository *repository.CommentRepository) {
