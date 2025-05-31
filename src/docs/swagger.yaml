@@ -42,9 +42,7 @@ definitions:
         type: string
       location:
         description: latitude, longitude, town
-        items:
-          type: integer
-        type: array
+        type: object
       name:
         type: string
       owner_id:
@@ -67,20 +65,14 @@ definitions:
       guide_id:
         type: string
       images:
-        items:
-          type: integer
-        type: array
+        type: object
       is_approved:
         type: boolean
       links:
-        items:
-          type: integer
-        type: array
+        type: object
       location:
         description: latitude, longitude
-        items:
-          type: integer
-        type: array
+        type: object
       publication_date:
         type: string
       title:
@@ -102,16 +94,12 @@ definitions:
       description:
         type: string
       docking_spots:
-        items:
-          type: integer
-        type: array
+        type: object
       is_approved:
         type: boolean
       location:
         description: latitude, longitude, town
-        items:
-          type: integer
-        type: array
+        type: object
       name:
         type: string
       owner_id:
@@ -119,9 +107,7 @@ definitions:
       port_id:
         type: string
       services:
-        items:
-          type: integer
-        type: array
+        type: object
     type: object
   model.Review:
     properties:
@@ -154,7 +140,7 @@ definitions:
   model.UserRole:
     enum:
     - admin
-    - editor
+    - user
     - dock_owner
     - sailor
     type: string
@@ -302,10 +288,22 @@ paths:
       description: Returns paginated list of bookings; supports query parameters forwarded
         to repository
       parameters:
-      - description: Page number
+      - description: Filter by Sailor UUID
         in: query
-        name: page
-        type: integer
+        name: sailor_id
+        type: string
+      - description: Filter by Dock UUID
+        in: query
+        name: dock_id
+        type: string
+      - description: Filter by payment status
+        in: query
+        name: payment_status
+        type: string
+      - description: Filter by payment method
+        in: query
+        name: payment_method
+        type: string
       - description: Items per page
         in: query
         name: limit
@@ -316,8 +314,9 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/model.Booking'
+            type: array
       summary: List bookings
       tags:
       - Bookings
@@ -457,10 +456,18 @@ paths:
       description: Returns paginated list of comments; supports query parameters forwarded
         to repository
       parameters:
-      - description: Page number
+      - description: Filter by Guide UUID
         in: query
-        name: page
-        type: integer
+        name: guide_id
+        type: string
+      - description: Filter by User UUID
+        in: query
+        name: user_id
+        type: string
+      - description: Filter by content (substring match)
+        in: query
+        name: content
+        type: string
       - description: Items per page
         in: query
         name: limit
@@ -471,8 +478,9 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/model.Comment'
+            type: array
       summary: List comments
       tags:
       - Comments
@@ -612,10 +620,18 @@ paths:
       description: Returns paginated list of docking spots; supports query parameters
         forwarded to repository
       parameters:
-      - description: Page number
+      - description: Filter by docking spot name (partial match)
         in: query
-        name: page
-        type: integer
+        name: name
+        type: string
+      - description: Filter by owner UUID
+        in: query
+        name: owner_id
+        type: string
+      - description: Filter by availability ('available' or 'unavailable')
+        in: query
+        name: availability
+        type: string
       - description: Items per page
         in: query
         name: limit
@@ -626,8 +642,9 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/model.DockingSpot'
+            type: array
       summary: List docking-spots
       tags:
       - DockingSpots
@@ -767,10 +784,18 @@ paths:
       description: Returns paginated list of guides; supports query parameters forwarded
         to repository
       parameters:
-      - description: Page number
+      - description: Filter by title (partial match)
         in: query
-        name: page
-        type: integer
+        name: title
+        type: string
+      - description: Filter by author UUID
+        in: query
+        name: author_id
+        type: string
+      - description: Filter by approval status
+        in: query
+        name: is_approved
+        type: boolean
       - description: Items per page
         in: query
         name: limit
@@ -781,8 +806,9 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/model.Guide'
+            type: array
       summary: List guides
       tags:
       - Guides
@@ -971,10 +997,14 @@ paths:
       description: Returns paginated list of notifications; supports query parameters
         forwarded to repository
       parameters:
-      - description: Page number
+      - description: Filter by User UUID
         in: query
-        name: page
-        type: integer
+        name: user_id
+        type: string
+      - description: Filter by message content (substring match)
+        in: query
+        name: message
+        type: string
       - description: Items per page
         in: query
         name: limit
@@ -985,8 +1015,9 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/model.Notification'
+            type: array
       summary: List notifications
       tags:
       - Notifications
@@ -1126,10 +1157,18 @@ paths:
       description: Returns paginated list of ports; supports query parameters forwarded
         to repository
       parameters:
-      - description: Page number
+      - description: Filter by port name (partial match)
         in: query
-        name: page
-        type: integer
+        name: name
+        type: string
+      - description: Filter by owner UUID
+        in: query
+        name: owner_id
+        type: string
+      - description: Filter by approval status
+        in: query
+        name: is_approved
+        type: boolean
       - description: Items per page
         in: query
         name: limit
@@ -1140,8 +1179,9 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/model.Port'
+            type: array
       summary: List ports
       tags:
       - Ports
@@ -1281,10 +1321,18 @@ paths:
       description: Returns paginated list of reviews; supports query parameters forwarded
         to repository
       parameters:
-      - description: Page number
+      - description: Filter by Reviewer UUID
         in: query
-        name: page
-        type: integer
+        name: reviewer_id
+        type: string
+      - description: Minimum rating
+        in: query
+        name: rating
+        type: number
+      - description: Text search in comment
+        in: query
+        name: comment
+        type: string
       - description: Items per page
         in: query
         name: limit
@@ -1295,8 +1343,9 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/model.Review'
+            type: array
       summary: List reviews
       tags:
       - Reviews

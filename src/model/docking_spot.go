@@ -8,7 +8,7 @@ import (
 type DockingSpot struct {
 	DockID          uuid.UUID       `gorm:"column:dock_id;primaryKey;type:uuid;default:uuid_generate_v4()" json:"dock_id"`
 	Name            string          `gorm:"column:name" json:"name"`
-	Location        json.RawMessage `gorm:"column:location;type:jsonb" json:"location"` // latitude, longitude, town
+	Location        json.RawMessage `gorm:"column:location;type:jsonb" json:"location" swaggertype:"object"` // latitude, longitude, town
 	Description     *string         `gorm:"column:description" json:"description,omitempty"`
 	OwnerID         uuid.UUID       `gorm:"column:owner_id;type:uuid" json:"owner_id"`
 	Services        *string         `gorm:"column:services" json:"services,omitempty"`

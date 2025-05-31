@@ -129,12 +129,14 @@ func (dsc *dockingSpotController) Delete(c *gin.Context) {
 // @Description  Returns paginated list of docking spots; supports query parameters forwarded to repository
 // @Tags         DockingSpots
 // @Produce      json
-// @Param        page   query     int false "Page number"
-// @Param        limit  query     int false "Items per page"
-// @Success      200    {object}  map[string]interface{}
+// @Param        name         query     string false "Filter by docking spot name (partial match)"
+// @Param        owner_id     query     string false "Filter by owner UUID"
+// @Param        availability query     string false "Filter by availability ('available' or 'unavailable')"
+// @Param        limit        query     int    false "Items per page"
+// @Success      200    {object}  []model.DockingSpot
 // @Router       /docking-spots/list [get]
 func (dsc *dockingSpotController) List(c *gin.Context) {
-	shared.ListEntities(c, dsc.dockingSpotRepository.ListDockingSpots)
+	shared.ListWithQuery(c, dsc.dockingSpotRepository.ListDockingSpots)
 }
 
 func AddDockingSpotRoutes(r *gin.Engine, dockingSpotRepository *repository.DockingSpotRepository) {

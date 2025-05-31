@@ -129,12 +129,15 @@ func (bc *bookingController) Delete(c *gin.Context) {
 // @Description  Returns paginated list of bookings; supports query parameters forwarded to repository
 // @Tags         Bookings
 // @Produce      json
-// @Param        page   query     int false "Page number"
-// @Param        limit  query     int false "Items per page"
-// @Success      200    {object}  map[string]interface{}
+// @Param        sailor_id      query     string false "Filter by Sailor UUID"
+// @Param        dock_id        query     string false "Filter by Dock UUID"
+// @Param        payment_status query     string false "Filter by payment status"
+// @Param        payment_method query     string false "Filter by payment method"
+// @Param        limit          query     int    false "Items per page"
+// @Success      200    {object}  []model.Booking
 // @Router       /bookings/list [get]
 func (bc *bookingController) List(c *gin.Context) {
-	shared.ListEntities(c, bc.bookingRepository.ListBookings)
+	shared.ListWithQuery(c, bc.bookingRepository.ListBookings)
 }
 
 func AddBookingRoutes(r *gin.Engine, bookingRepository *repository.BookingRepository) {

@@ -12,8 +12,8 @@ type Guide struct {
 	Content         string           `gorm:"column:content" json:"content"`
 	AuthorID        uuid.UUID        `gorm:"column:author_id;type:uuid" json:"author_id"`
 	PublicationDate time.Time        `gorm:"column:publication_date" json:"publication_date"`
-	Images          *json.RawMessage `gorm:"column:images;type:jsonb" json:"images,omitempty"`
-	Links           *json.RawMessage `gorm:"column:links;type:jsonb" json:"links,omitempty"`
-	Location        json.RawMessage  `gorm:"column:location;type:jsonb" json:"location"` // latitude, longitude
+	Images          *json.RawMessage `gorm:"column:images;type:jsonb" json:"images,omitempty" swaggertype:"object"`
+	Links           *json.RawMessage `gorm:"column:links;type:jsonb" json:"links,omitempty" swaggertype:"object"`
+	Location        json.RawMessage  `gorm:"column:location;type:jsonb" json:"location" swaggertype:"object"` // latitude, longitude
 	IsApproved      bool             `gorm:"column:is_approved" json:"is_approved"`
 }

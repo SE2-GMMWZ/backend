@@ -4,6 +4,7 @@ import (
 	"backend/src/model"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type PortRepository struct {
@@ -24,9 +25,34 @@ func (r *PortRepository) GetPortByID(id uuid.UUID) (*model.Port, error) {
 	return &port, err
 }
 
-func (r *PortRepository) ListPorts(limit, offset int) ([]model.Port, error) {
+
+
+func (r *PortRepository) ListPorts(limit, offset int, query string) ([]model.Port, error) {
 	var ports []model.Port
-	err := r.db.Order("port_id").Limit(limit).Offset(offset).Find(&ports).Error
+	db := r.db.Model(&model.Port{})
+
+	// Basic query parsing: support "name=...", "owner_id=...", "is_approved=..."
+	if query != "" {
+		parts := strings.Split(query, "&")
+		for _, part := range parts {
+			kv := strings.SplitN(part, "=", 2)
+			if len(kv) != 2 {
+				continue
+			}
+			key := kv[0]
+			value := kv[1]
+			switch key {
+			case "name":
+				db = db.Where("name ILIKE ?", "%"+value+"%")
+			case "owner_id":
+				db = db.Where("owner_id = ?", value)
+			case "is_approved":
+				db = db.Where("is_approved = ?", value)
+			}
+		}
+	}
+
+	err := db.Order("port_id").Limit(limit).Offset(offset).Find(&ports).Error
 	return ports, err
 }
 

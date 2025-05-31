@@ -129,12 +129,14 @@ func (rc *reviewController) Delete(c *gin.Context) {
 // @Description  Returns paginated list of reviews; supports query parameters forwarded to repository
 // @Tags         Reviews
 // @Produce      json
-// @Param        page   query     int false "Page number"
-// @Param        limit  query     int false "Items per page"
-// @Success      200    {object}  map[string]interface{}
+// @Param        reviewer_id  query     string false "Filter by Reviewer UUID"
+// @Param        rating       query     number false "Minimum rating"
+// @Param        comment      query     string false "Text search in comment"
+// @Param        limit        query     int    false "Items per page"
+// @Success      200    {object}  []model.Review
 // @Router       /reviews/list [get]
 func (rc *reviewController) List(c *gin.Context) {
-	shared.ListEntities(c, rc.reviewRepository.ListReviews)
+	shared.ListWithQuery(c, rc.reviewRepository.ListReviews)
 }
 
 func AddReviewRoutes(r *gin.Engine, reviewRepository *repository.ReviewRepository) {

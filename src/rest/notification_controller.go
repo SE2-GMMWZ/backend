@@ -129,12 +129,13 @@ func (nc *notificationController) Delete(c *gin.Context) {
 // @Description  Returns paginated list of notifications; supports query parameters forwarded to repository
 // @Tags         Notifications
 // @Produce      json
-// @Param        page   query     int false "Page number"
-// @Param        limit  query     int false "Items per page"
-// @Success      200    {object}  map[string]interface{}
+// @Param        user_id  query     string false "Filter by User UUID"
+// @Param        message  query     string false "Filter by message content (substring match)"
+// @Param        limit    query     int    false "Items per page"
+// @Success      200    {object}  []model.Notification
 // @Router       /notifications/list [get]
 func (nc *notificationController) List(c *gin.Context) {
-	shared.ListEntities(c, nc.notificationRepository.ListNotifications)
+	shared.ListWithQuery(c, nc.notificationRepository.ListNotifications)
 }
 
 func AddNotificationRoutes(r *gin.Engine, notificationRepository *repository.NotificationRepository) {

@@ -129,12 +129,14 @@ func (pc *portController) Delete(c *gin.Context) {
 // @Description  Returns paginated list of ports; supports query parameters forwarded to repository
 // @Tags         Ports
 // @Produce      json
-// @Param        page   query     int false "Page number"
-// @Param        limit  query     int false "Items per page"
-// @Success      200    {object}  map[string]interface{}
+// @Param        name         query     string false "Filter by port name (partial match)"
+// @Param        owner_id     query     string false "Filter by owner UUID"
+// @Param        is_approved  query     bool   false "Filter by approval status"
+// @Param        limit        query     int    false "Items per page"
+// @Success      200    {object}  []model.Port
 // @Router       /ports/list [get]
 func (pc *portController) List(c *gin.Context) {
-	shared.ListEntities(c, pc.portRepository.ListPorts)
+	shared.ListWithQuery(c, pc.portRepository.ListPorts)
 }
 
 func AddPortRoutes(r *gin.Engine, portRepository *repository.PortRepository) {

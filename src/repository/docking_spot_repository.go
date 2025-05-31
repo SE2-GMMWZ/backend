@@ -4,6 +4,7 @@ import (
 	"backend/src/model"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type DockingSpotRepository struct {
@@ -31,8 +32,32 @@ func (r *DockingSpotRepository) UpdateDockingSpot(dock *model.DockingSpot) error
 func (r *DockingSpotRepository) DeleteDockingSpot(id uuid.UUID) error {
 	return r.db.Delete(&model.DockingSpot{}, "dock_id = ?", id).Error
 }
-func (r *DockingSpotRepository) ListDockingSpots(limit, offset int) ([]model.DockingSpot, error) {
+
+func (r *DockingSpotRepository) ListDockingSpots(limit, offset int, query string) ([]model.DockingSpot, error) {
 	var spots []model.DockingSpot
-	err := r.db.Order("dock_id").Limit(limit).Offset(offset).Find(&spots).Error
+	db := r.db.Model(&model.DockingSpot{})
+
+	// Basic query parsing: support "name=...", "owner_id=...", "availability=..."
+	if query != "" {
+		parts := strings.Split(query, "&")
+		for _, part := range parts {
+			kv := strings.SplitN(part, "=", 2)
+			if len(kv) != 2 {
+				continue
+			}
+			key := kv[0]
+			value := kv[1]
+			switch key {
+			case "name":
+				db = db.Where("name ILIKE ?", "%"+value+"%")
+			case "owner_id":
+				db = db.Where("owner_id = ?", value)
+			case "availability":
+				db = db.Where("availability = ?", value)
+			}
+		}
+	}
+
+	err := db.Order("dock_id").Limit(limit).Offset(offset).Find(&spots).Error
 	return spots, err
 }
