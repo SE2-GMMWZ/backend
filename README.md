@@ -16,4 +16,4 @@
 ## First objectives:
 #### Set up repositories
 #### Set up VMs for backend and frontend
-#### Split up coding responsibilites on backend and frontend 
+#### Split up coding responsibilites on backend and frontend

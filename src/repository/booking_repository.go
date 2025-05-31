@@ -34,6 +34,6 @@ func (r *BookingRepository) DeleteBooking(id uuid.UUID) error {
 
 func (r *BookingRepository) ListBookings(limit, offset int) ([]model.Booking, error) {
 	var bookings []model.Booking
-	err := r.db.Limit(limit).Offset(offset).Find(&bookings).Error
+	err := r.db.Order("booking_id").Limit(limit).Offset(offset).Find(&bookings).Error
 	return bookings, err
 }
