@@ -26,7 +26,7 @@ func (r *PortRepository) GetPortByID(id uuid.UUID) (*model.Port, error) {
 
 func (r *PortRepository) ListPorts(limit, offset int) ([]model.Port, error) {
 	var ports []model.Port
-	err := r.db.Limit(limit).Offset(offset).Find(&ports).Error
+	err := r.db.Order("port_id").Limit(limit).Offset(offset).Find(&ports).Error
 	return ports, err
 }
 

@@ -50,6 +50,6 @@ func (r *UserRepository) ListUsers(limit, offset int, query string) ([]model.Use
 		)
 	}
 
-	err := db.Limit(limit).Offset(offset).Find(&users).Error
+	err := db.Order("user_id ASC").Limit(limit).Offset(offset).Find(&users).Error
 	return users, err
 }

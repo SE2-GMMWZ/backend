@@ -34,6 +34,6 @@ func (r *GuideRepository) DeleteGuide(id uuid.UUID) error {
 
 func (r *GuideRepository) ListGuides(limit, offset int) ([]model.Guide, error) {
 	var guides []model.Guide
-	err := r.db.Limit(limit).Offset(offset).Find(&guides).Error
+	err := r.db.Order("guide_id asc").Limit(limit).Offset(offset).Find(&guides).Error
 	return guides, err
 }

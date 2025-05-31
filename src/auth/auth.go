@@ -2,12 +2,13 @@ package auth
 
 import (
 	"backend/src/model"
-	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 )
 
 var jwtSecret = []byte("supersecretkey")
@@ -73,6 +74,7 @@ func RedirectIfAuthenticated() gin.HandlerFunc {
 		if cookie, err := c.Cookie("token"); err == nil {
 			authHeader = cookie
 		}
+
 		token, err := jwt.ParseWithClaims(authHeader, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 			return jwtSecret, nil
 		})

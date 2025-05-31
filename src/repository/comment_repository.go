@@ -34,6 +34,6 @@ func (r *CommentRepository) DeleteComment(id uuid.UUID) error {
 
 func (r *CommentRepository) ListComments(limit, offset int) ([]model.Comment, error) {
 	var comments []model.Comment
-	err := r.db.Limit(limit).Offset(offset).Find(&comments).Error
+	err := r.db.Order("comment_id").Limit(limit).Offset(offset).Find(&comments).Error
 	return comments, err
 }
