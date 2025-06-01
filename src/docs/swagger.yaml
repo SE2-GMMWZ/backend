@@ -308,6 +308,10 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -471,6 +475,10 @@ paths:
       - description: Items per page
         in: query
         name: limit
+        type: integer
+      - description: Page number
+        in: query
+        name: page
         type: integer
       produces:
       - application/json
@@ -636,6 +644,10 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -799,6 +811,10 @@ paths:
       - description: Items per page
         in: query
         name: limit
+        type: integer
+      - description: Page number
+        in: query
+        name: page
         type: integer
       produces:
       - application/json
@@ -1009,6 +1025,10 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -1173,6 +1193,10 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Page number for pagination
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -1336,6 +1360,10 @@ paths:
       - description: Items per page
         in: query
         name: limit
+        type: integer
+      - description: Page number
+        in: query
+        name: page
         type: integer
       produces:
       - application/json
@@ -1516,6 +1544,31 @@ paths:
       description: Returns paginated list of users; supports query parameters forwarded
         to repository
       parameters:
+      - description: Filter by email (partial match)
+        in: query
+        name: email
+        type: string
+      - description: Filter by name (partial match)
+        in: query
+        name: name
+        type: string
+      - description: Filter by surname (partial match)
+        in: query
+        name: surname
+        type: string
+      - description: Filter by phone number (partial match)
+        in: query
+        name: phone_number
+        type: string
+      - description: Filter by role (admin, user, dock_owner, sailor)
+        in: query
+        name: role
+        type: string
+      - description: General search query across multiple fields. Accepts any search
+          string.
+        in: query
+        name: query
+        type: string
       - description: Page number
         in: query
         name: page
@@ -1530,7 +1583,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.User'
+            additionalProperties: true
+            type: object
       summary: List users
       tags:
       - Users
