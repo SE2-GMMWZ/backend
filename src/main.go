@@ -51,7 +51,6 @@ func main() {
 	dockingSpotRepository := repository.NewDockingSpotRepository(gormDb)
 	guideRepository := repository.NewGuideRepository(gormDb)
 	notificationRepository := repository.NewNotificationRepository(gormDb)
-	portRepository := repository.NewPortRepository(gormDb)
 	reviewRepository := repository.NewReviewRepository(gormDb)
 
 	r := gin.Default()
@@ -77,7 +76,6 @@ func main() {
 	rest.AddDockingSpotRoutes(r, dockingSpotRepository)
 	rest.AddGuideRoutes(r, guideRepository)
 	rest.AddNotificationRoutes(r, notificationRepository)
-	rest.AddPortRoutes(r, portRepository)
 	rest.AddReviewRoutes(r, reviewRepository)
 
 	if err := r.Run(":8080"); err != nil {
