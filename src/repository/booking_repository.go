@@ -2,6 +2,7 @@ package repository
 
 import (
 	"backend/src/model"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -31,8 +32,6 @@ func (r *BookingRepository) UpdateBooking(booking *model.Booking) error {
 func (r *BookingRepository) DeleteBooking(id uuid.UUID) error {
 	return r.db.Delete(&model.Booking{}, "booking_id = ?", id).Error
 }
-
-
 
 func (r *BookingRepository) ListBookings(limit, page int, sailorID, dockID, paymentStatus, paymentMethod string) ([]model.Booking, int, int, error) {
 	var bookings []model.Booking

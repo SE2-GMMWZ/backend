@@ -2,6 +2,7 @@ package repository
 
 import (
 	"backend/src/model"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -31,8 +32,6 @@ func (r *CommentRepository) UpdateComment(comment *model.Comment) error {
 func (r *CommentRepository) DeleteComment(id uuid.UUID) error {
 	return r.db.Delete(&model.Comment{}, "comment_id = ?", id).Error
 }
-
-
 
 func (r *CommentRepository) ListComments(limit, page int, guideID, userID, content string) ([]model.Comment, int, int, error) {
 	var comments []model.Comment

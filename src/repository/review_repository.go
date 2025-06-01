@@ -2,6 +2,7 @@ package repository
 
 import (
 	"backend/src/model"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -31,8 +32,6 @@ func (r *ReviewRepository) UpdateReview(review *model.Review) error {
 func (r *ReviewRepository) DeleteReview(id uuid.UUID) error {
 	return r.db.Delete(&model.Review{}, "review_id = ?", id).Error
 }
-
-
 
 func (r *ReviewRepository) ListReviews(limit, page int, reviewerID string, minRating *float64, comment string) ([]model.Review, int, int, error) {
 	var reviews []model.Review

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"backend/src/model"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -31,8 +32,6 @@ func (r *GuideRepository) UpdateGuide(guide *model.Guide) error {
 func (r *GuideRepository) DeleteGuide(id uuid.UUID) error {
 	return r.db.Delete(&model.Guide{}, "guide_id = ?", id).Error
 }
-
-
 
 func (r *GuideRepository) ListGuides(limit, page int, title, authorID string, isApproved *bool) ([]model.Guide, int, int, error) {
 	var guides []model.Guide
