@@ -3,7 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
-	"backend/src/rest/shared"
+	"strconv"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -133,10 +133,47 @@ func (gc *guideController) Delete(c *gin.Context) {
 // @Param        author_id    query     string false "Filter by author UUID"
 // @Param        is_approved  query     bool   false "Filter by approval status"
 // @Param        limit        query     int    false "Items per page"
+// @Param        page         query     int    false "Page number"
 // @Success      200    {object}  []model.Guide
 // @Router       /guides/list [get]
 func (gc *guideController) List(c *gin.Context) {
-	shared.ListWithQuery(c, gc.guideRepository.ListGuides)
+	title := c.Query("title")
+	authorID := c.Query("author_id")
+	isApprovedStr := c.Query("is_approved")
+	limitStr := c.DefaultQuery("limit", "10")
+	pageStr := c.DefaultQuery("page", "1")
+
+	isApproved := false
+	if isApprovedStr == "true" {
+		isApproved = true
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		page = 1
+	}
+
+	var isApprovedPtr *bool
+	if isApprovedStr != "" {
+		isApprovedPtr = &isApproved
+	}
+
+	guides, currentPage, totalPages, err := gc.guideRepository.ListGuides(limit, page, title, authorID, isApprovedPtr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list guides"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"guides":      guides,
+		"page":        currentPage,
+		"total_pages": totalPages,
+	})
 }
 
 func AddGuideRoutes(r *gin.Engine, guideRepository *repository.GuideRepository) {

@@ -3,9 +3,10 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
-	"backend/src/rest/shared"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"strconv"
 	"net/http"
 )
 
@@ -133,10 +134,37 @@ func (dsc *dockingSpotController) Delete(c *gin.Context) {
 // @Param        owner_id     query     string false "Filter by owner UUID"
 // @Param        availability query     string false "Filter by availability ('available' or 'unavailable')"
 // @Param        limit        query     int    false "Items per page"
+// @Param        page         query     int    false "Page number"
 // @Success      200    {object}  []model.DockingSpot
 // @Router       /docking-spots/list [get]
 func (dsc *dockingSpotController) List(c *gin.Context) {
-	shared.ListWithQuery(c, dsc.dockingSpotRepository.ListDockingSpots)
+	name := c.Query("name")
+	ownerID := c.Query("owner_id")
+	availability := c.Query("availability")
+	limitStr := c.DefaultQuery("limit", "10")
+	pageStr := c.DefaultQuery("page", "1")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		page = 1
+	}
+
+	dockingSpots, currentPage, totalPages, err := dsc.dockingSpotRepository.ListDockingSpots(limit, page, name, ownerID, availability)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list docking spots"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"docking_spots": dockingSpots,
+		"page":          currentPage,
+		"total_pages":   totalPages,
+	})
 }
 
 func AddDockingSpotRoutes(r *gin.Engine, dockingSpotRepository *repository.DockingSpotRepository) {

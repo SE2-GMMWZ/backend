@@ -38,10 +38,28 @@ func (r *UserRepository) DeleteUser(id uuid.UUID) error {
 	return r.db.Delete(&model.User{}, "user_id = ?", id).Error
 }
 
-func (r *UserRepository) ListUsers(limit, offset int, query string) ([]model.User, error) {
+func (r *UserRepository) ListUsers(limit, page int, email, name, surname, phoneNumber, role, query string) ([]model.User, int, int, error) {
 	var users []model.User
 	db := r.db.Model(&model.User{})
 
+	// Apply specific field filters
+	if email != "" {
+		db = db.Where("email ILIKE ?", "%"+email+"%")
+	}
+	if name != "" {
+		db = db.Where("name ILIKE ?", "%"+name+"%")
+	}
+	if surname != "" {
+		db = db.Where("surname ILIKE ?", "%"+surname+"%")
+	}
+	if phoneNumber != "" {
+		db = db.Where("phone_number ILIKE ?", "%"+phoneNumber+"%")
+	}
+	if role != "" {
+		db = db.Where("role = ?", role)
+	}
+
+	// Apply general search query across multiple fields
 	if query != "" {
 		likePattern := "%" + query + "%"
 		db = db.Where(
@@ -50,6 +68,11 @@ func (r *UserRepository) ListUsers(limit, offset int, query string) ([]model.Use
 		)
 	}
 
+	offset := (page - 1) * limit
+	var totalRecords int64
+	db.Count(&totalRecords)
+
 	err := db.Order("user_id ASC").Limit(limit).Offset(offset).Find(&users).Error
-	return users, err
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+	return users, page, totalPages, err
 }

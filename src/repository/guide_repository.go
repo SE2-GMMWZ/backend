@@ -2,9 +2,9 @@ package repository
 
 import (
 	"backend/src/model"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type GuideRepository struct {
@@ -33,33 +33,26 @@ func (r *GuideRepository) DeleteGuide(id uuid.UUID) error {
 	return r.db.Delete(&model.Guide{}, "guide_id = ?", id).Error
 }
 
-
-
-func (r *GuideRepository) ListGuides(limit, offset int, query string) ([]model.Guide, error) {
+func (r *GuideRepository) ListGuides(limit, page int, title, authorID string, isApproved *bool) ([]model.Guide, int, int, error) {
 	var guides []model.Guide
 	db := r.db.Model(&model.Guide{})
 
-	// Basic query parsing: support "title=...", "author_id=...", "is_approved=..."
-	if query != "" {
-		parts := strings.Split(query, "&")
-		for _, part := range parts {
-			kv := strings.SplitN(part, "=", 2)
-			if len(kv) != 2 {
-				continue
-			}
-			key := kv[0]
-			value := kv[1]
-			switch key {
-			case "title":
-				db = db.Where("title ILIKE ?", "%"+value+"%")
-			case "author_id":
-				db = db.Where("author_id = ?", value)
-			case "is_approved":
-				db = db.Where("is_approved = ?", value)
-			}
-		}
+	// Apply filters based on provided parameters
+	if title != "" {
+		db = db.Where("title ILIKE ?", "%"+title+"%")
+	}
+	if authorID != "" {
+		db = db.Where("author_id = ?", authorID)
+	}
+	if isApproved != nil {
+		db = db.Where("is_approved = ?", *isApproved)
 	}
 
+	offset := (page - 1) * limit
+	var totalRecords int64
+	db.Count(&totalRecords)
+
 	err := db.Order("guide_id asc").Limit(limit).Offset(offset).Find(&guides).Error
-	return guides, err
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+	return guides, page, totalPages, err
 }

@@ -2,9 +2,9 @@ package repository
 
 import (
 	"backend/src/model"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type CommentRepository struct {
@@ -33,33 +33,26 @@ func (r *CommentRepository) DeleteComment(id uuid.UUID) error {
 	return r.db.Delete(&model.Comment{}, "comment_id = ?", id).Error
 }
 
-
-
-func (r *CommentRepository) ListComments(limit, offset int, query string) ([]model.Comment, error) {
+func (r *CommentRepository) ListComments(limit, page int, guideID, userID, content string) ([]model.Comment, int, int, error) {
 	var comments []model.Comment
 	db := r.db.Model(&model.Comment{})
 
-	// Basic query parsing: support "guide_id=...", "user_id=...", "content=..."
-	if query != "" {
-		parts := strings.Split(query, "&")
-		for _, part := range parts {
-			kv := strings.SplitN(part, "=", 2)
-			if len(kv) != 2 {
-				continue
-			}
-			key := kv[0]
-			value := kv[1]
-			switch key {
-			case "guide_id":
-				db = db.Where("guide_id = ?", value)
-			case "user_id":
-				db = db.Where("user_id = ?", value)
-			case "content":
-				db = db.Where("content ILIKE ?", "%"+value+"%")
-			}
-		}
+	// Apply filters based on provided parameters
+	if guideID != "" {
+		db = db.Where("guide_id = ?", guideID)
+	}
+	if userID != "" {
+		db = db.Where("user_id = ?", userID)
+	}
+	if content != "" {
+		db = db.Where("content ILIKE ?", "%"+content+"%")
 	}
 
+	offset := (page - 1) * limit
+	var totalRecords int64
+	db.Count(&totalRecords)
+
 	err := db.Order("comment_id").Limit(limit).Offset(offset).Find(&comments).Error
-	return comments, err
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+	return comments, page, totalPages, err
 }

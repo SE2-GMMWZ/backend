@@ -89,26 +89,6 @@ definitions:
       user_id:
         type: string
     type: object
-  model.Port:
-    properties:
-      description:
-        type: string
-      docking_spots:
-        type: object
-      is_approved:
-        type: boolean
-      location:
-        description: latitude, longitude, town
-        type: object
-      name:
-        type: string
-      owner_id:
-        type: string
-      port_id:
-        type: string
-      services:
-        type: object
-    type: object
   model.Review:
     properties:
       comment:
@@ -308,6 +288,10 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -471,6 +455,10 @@ paths:
       - description: Items per page
         in: query
         name: limit
+        type: integer
+      - description: Page number
+        in: query
+        name: page
         type: integer
       produces:
       - application/json
@@ -636,6 +624,10 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -799,6 +791,10 @@ paths:
       - description: Items per page
         in: query
         name: limit
+        type: integer
+      - description: Page number
+        in: query
+        name: page
         type: integer
       produces:
       - application/json
@@ -1009,6 +1005,10 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Page number
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -1021,170 +1021,6 @@ paths:
       summary: List notifications
       tags:
       - Notifications
-  /ports:
-    post:
-      consumes:
-      - application/json
-      description: Creates a new port
-      parameters:
-      - description: Port to create
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/model.Port'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/model.Port'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Create port
-      tags:
-      - Ports
-  /ports/{id}:
-    delete:
-      description: Deletes a port by its UUID
-      parameters:
-      - description: Port UUID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Delete port
-      tags:
-      - Ports
-    get:
-      description: Returns a single port by its UUID
-      parameters:
-      - description: Port UUID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Port'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get port
-      tags:
-      - Ports
-    put:
-      consumes:
-      - application/json
-      description: Updates a port by its UUID
-      parameters:
-      - description: Port UUID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Port data to update
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/model.Port'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Port'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Update port
-      tags:
-      - Ports
-  /ports/list:
-    get:
-      description: Returns paginated list of ports; supports query parameters forwarded
-        to repository
-      parameters:
-      - description: Filter by port name (partial match)
-        in: query
-        name: name
-        type: string
-      - description: Filter by owner UUID
-        in: query
-        name: owner_id
-        type: string
-      - description: Filter by approval status
-        in: query
-        name: is_approved
-        type: boolean
-      - description: Items per page
-        in: query
-        name: limit
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Port'
-            type: array
-      summary: List ports
-      tags:
-      - Ports
   /reviews:
     post:
       consumes:
@@ -1336,6 +1172,10 @@ paths:
       - description: Items per page
         in: query
         name: limit
+        type: integer
+      - description: Page number
+        in: query
+        name: page
         type: integer
       produces:
       - application/json
@@ -1516,6 +1356,31 @@ paths:
       description: Returns paginated list of users; supports query parameters forwarded
         to repository
       parameters:
+      - description: Filter by email (partial match)
+        in: query
+        name: email
+        type: string
+      - description: Filter by name (partial match)
+        in: query
+        name: name
+        type: string
+      - description: Filter by surname (partial match)
+        in: query
+        name: surname
+        type: string
+      - description: Filter by phone number (partial match)
+        in: query
+        name: phone_number
+        type: string
+      - description: Filter by role (admin, user, dock_owner, sailor)
+        in: query
+        name: role
+        type: string
+      - description: General search query across multiple fields. Accepts any search
+          string.
+        in: query
+        name: query
+        type: string
       - description: Page number
         in: query
         name: page
@@ -1530,7 +1395,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.User'
+            additionalProperties: true
+            type: object
       summary: List users
       tags:
       - Users

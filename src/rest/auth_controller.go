@@ -4,13 +4,14 @@ import (
 	"backend/src/auth"
 	"backend/src/model"
 	"backend/src/repository"
-	"backend/src/rest/shared"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"strings"
 )
 
 type authController struct {
@@ -269,12 +270,47 @@ func (ac *authController) Login(c *gin.Context) {
 // @Description  Returns paginated list of users; supports query parameters forwarded to repository
 // @Tags         Users
 // @Produce      json
-// @Param        page   query     int false "Page number"
-// @Param        limit  query     int false "Items per page"
-// @Success      200    {object}  model.User
+// @Param        email        query     string false "Filter by email (partial match)"
+// @Param        name         query     string false "Filter by name (partial match)"
+// @Param        surname      query     string false "Filter by surname (partial match)"
+// @Param        phone_number query     string false "Filter by phone number (partial match)"
+// @Param        role         query     string false "Filter by role (admin, user, dock_owner, sailor)"
+// @Param        query        query     string false "General search query across multiple fields. Accepts any search string."
+// @Param        page         query     int    false "Page number"
+// @Param        limit        query     int    false "Items per page"
+// @Success      200    {object}  map[string]interface{}
 // @Router       /users/list [get]
 func (ac *authController) List(c *gin.Context) {
-	shared.ListWithQuery(c, ac.userRepository.ListUsers)
+	email := c.Query("email")
+	name := c.Query("name")
+	surname := c.Query("surname")
+	phoneNumber := c.Query("phone_number")
+	role := c.Query("role")
+	query := c.Query("query")
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	users, currentPage, totalPages, err := ac.userRepository.ListUsers(limit, page, email, name, surname, phoneNumber, role, query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"users":        users,
+		"current_page": currentPage,
+		"total_pages":  totalPages,
+	})
 }
 
 // Logout godoc

@@ -3,10 +3,11 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
-	"backend/src/rest/shared"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
+	"strconv"
 )
 
 type commentController struct {
@@ -133,10 +134,37 @@ func (cc *commentController) Delete(c *gin.Context) {
 // @Param        user_id   query     string false "Filter by User UUID"
 // @Param        content   query     string false "Filter by content (substring match)"
 // @Param        limit     query     int    false "Items per page"
+// @Param        page      query     int    false "Page number"
 // @Success      200    {object}  []model.Comment
 // @Router       /comments/list [get]
 func (cc *commentController) List(c *gin.Context) {
-	shared.ListWithQuery(c, cc.commentRepository.ListComments)
+	guideID := c.Query("guide_id")
+	userID := c.Query("user_id")
+	content := c.Query("content")
+	limitStr := c.DefaultQuery("limit", "10")
+	pageStr := c.DefaultQuery("page", "1")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		page = 1
+	}
+
+	comments, currentPage, totalPages, err := cc.commentRepository.ListComments(limit, page, guideID, userID, content)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list comments"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"comments":     comments,
+		"current_page": currentPage,
+		"total_pages":  totalPages,
+	})
 }
 
 func AddCommentRoutes(r *gin.Engine, commentRepository *repository.CommentRepository) {

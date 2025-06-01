@@ -2,9 +2,9 @@ package repository
 
 import (
 	"backend/src/model"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type NotificationRepository struct {
@@ -33,29 +33,23 @@ func (r *NotificationRepository) DeleteNotification(id uuid.UUID) error {
 	return r.db.Delete(&model.Notification{}, "notification_id = ?", id).Error
 }
 
-func (r *NotificationRepository) ListNotifications(limit, offset int, query string) ([]model.Notification, error) {
+func (r *NotificationRepository) ListNotifications(limit, page int, userID, message string) ([]model.Notification, int, int, error) {
 	var notifications []model.Notification
 	db := r.db.Model(&model.Notification{})
 
-	// Basic query parsing: support "user_id=...", "message=..."
-	if query != "" {
-		parts := strings.Split(query, "&")
-		for _, part := range parts {
-			kv := strings.SplitN(part, "=", 2)
-			if len(kv) != 2 {
-				continue
-			}
-			key := kv[0]
-			value := kv[1]
-			switch key {
-			case "user_id":
-				db = db.Where("user_id = ?", value)
-			case "message":
-				db = db.Where("message ILIKE ?", "%"+value+"%")
-			}
-		}
+	// Apply filters based on provided parameters
+	if userID != "" {
+		db = db.Where("user_id = ?", userID)
+	}
+	if message != "" {
+		db = db.Where("message ILIKE ?", "%"+message+"%")
 	}
 
+	offset := (page - 1) * limit
+	var totalRecords int64
+	db.Count(&totalRecords)
+
 	err := db.Order("notification_id").Limit(limit).Offset(offset).Find(&notifications).Error
-	return notifications, err
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+	return notifications, page, totalPages, err
 }
