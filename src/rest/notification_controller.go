@@ -3,7 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
-	"backend/src/rest/shared"
+	"strconv"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -132,10 +132,36 @@ func (nc *notificationController) Delete(c *gin.Context) {
 // @Param        user_id  query     string false "Filter by User UUID"
 // @Param        message  query     string false "Filter by message content (substring match)"
 // @Param        limit    query     int    false "Items per page"
+// @Param        page     query     int    false "Page number"
 // @Success      200    {object}  []model.Notification
 // @Router       /notifications/list [get]
 func (nc *notificationController) List(c *gin.Context) {
-	shared.ListWithQuery(c, nc.notificationRepository.ListNotifications)
+	userID := c.Query("user_id")
+	message := c.Query("message")
+	limitStr := c.DefaultQuery("limit", "10")
+	pageStr := c.DefaultQuery("page", "1")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		page = 1
+	}
+
+	notifications, currentPage, totalPages, err := nc.notificationRepository.ListNotifications(limit, page, userID, message)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list notifications"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"notifications": notifications,
+		"page":          currentPage,
+		"total_pages":   totalPages,
+	})
 }
 
 func AddNotificationRoutes(r *gin.Engine, notificationRepository *repository.NotificationRepository) {

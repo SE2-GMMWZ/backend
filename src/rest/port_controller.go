@@ -3,10 +3,11 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
-	"backend/src/rest/shared"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
+	"strconv"
 )
 
 type portController struct {
@@ -133,10 +134,47 @@ func (pc *portController) Delete(c *gin.Context) {
 // @Param        owner_id     query     string false "Filter by owner UUID"
 // @Param        is_approved  query     bool   false "Filter by approval status"
 // @Param        limit        query     int    false "Items per page"
+// @Param        page         query     int    false "Page number for pagination"
 // @Success      200    {object}  []model.Port
 // @Router       /ports/list [get]
 func (pc *portController) List(c *gin.Context) {
-	shared.ListWithQuery(c, pc.portRepository.ListPorts)
+	name := c.Query("name")
+	ownerID := c.Query("owner_id")
+	isApprovedStr := c.Query("is_approved")
+	limitStr := c.DefaultQuery("limit", "10")
+	pageStr := c.DefaultQuery("page", "1")
+
+	isApproved := false
+	if isApprovedStr == "true" {
+		isApproved = true
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		page = 1
+	}
+
+	var isApprovedPtr *bool
+	if isApprovedStr != "" {
+		isApprovedPtr = &isApproved
+	}
+
+	ports, currentPage, totalPages, err := pc.portRepository.ListPorts(limit, page, name, ownerID, isApprovedPtr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list ports"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"ports":       ports,
+		"page":        currentPage,
+		"total_pages": totalPages,
+	})
 }
 
 func AddPortRoutes(r *gin.Engine, portRepository *repository.PortRepository) {

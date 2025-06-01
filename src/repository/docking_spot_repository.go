@@ -4,7 +4,6 @@ import (
 	"backend/src/model"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type DockingSpotRepository struct {
@@ -33,31 +32,26 @@ func (r *DockingSpotRepository) DeleteDockingSpot(id uuid.UUID) error {
 	return r.db.Delete(&model.DockingSpot{}, "dock_id = ?", id).Error
 }
 
-func (r *DockingSpotRepository) ListDockingSpots(limit, offset int, query string) ([]model.DockingSpot, error) {
+func (r *DockingSpotRepository) ListDockingSpots(limit, page int, name, ownerID, availability string) ([]model.DockingSpot, int, int, error) {
 	var spots []model.DockingSpot
 	db := r.db.Model(&model.DockingSpot{})
 
-	// Basic query parsing: support "name=...", "owner_id=...", "availability=..."
-	if query != "" {
-		parts := strings.Split(query, "&")
-		for _, part := range parts {
-			kv := strings.SplitN(part, "=", 2)
-			if len(kv) != 2 {
-				continue
-			}
-			key := kv[0]
-			value := kv[1]
-			switch key {
-			case "name":
-				db = db.Where("name ILIKE ?", "%"+value+"%")
-			case "owner_id":
-				db = db.Where("owner_id = ?", value)
-			case "availability":
-				db = db.Where("availability = ?", value)
-			}
-		}
+	// Apply filters based on provided parameters
+	if name != "" {
+		db = db.Where("name ILIKE ?", "%"+name+"%")
+	}
+	if ownerID != "" {
+		db = db.Where("owner_id = ?", ownerID)
+	}
+	if availability != "" {
+		db = db.Where("availability = ?", availability)
 	}
 
+	offset := (page - 1) * limit
+	var totalRecords int64
+	db.Count(&totalRecords)
+
 	err := db.Order("dock_id").Limit(limit).Offset(offset).Find(&spots).Error
-	return spots, err
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+	return spots, page, totalPages, err
 }

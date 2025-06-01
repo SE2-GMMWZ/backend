@@ -4,7 +4,6 @@ import (
 	"backend/src/model"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type BookingRepository struct {
@@ -35,33 +34,29 @@ func (r *BookingRepository) DeleteBooking(id uuid.UUID) error {
 
 
 
-func (r *BookingRepository) ListBookings(limit, offset int, query string) ([]model.Booking, error) {
+func (r *BookingRepository) ListBookings(limit, page int, sailorID, dockID, paymentStatus, paymentMethod string) ([]model.Booking, int, int, error) {
 	var bookings []model.Booking
 	db := r.db.Model(&model.Booking{})
 
-	// Basic query parsing: support "sailor_id=...", "dock_id=...", "payment_status=...", "payment_method=..."
-	if query != "" {
-		parts := strings.Split(query, "&")
-		for _, part := range parts {
-			kv := strings.SplitN(part, "=", 2)
-			if len(kv) != 2 {
-				continue
-			}
-			key := kv[0]
-			value := kv[1]
-			switch key {
-			case "sailor_id":
-				db = db.Where("sailor_id = ?", value)
-			case "dock_id":
-				db = db.Where("dock_id = ?", value)
-			case "payment_status":
-				db = db.Where("payment_status ILIKE ?", value)
-			case "payment_method":
-				db = db.Where("payment_method ILIKE ?", value)
-			}
-		}
+	// Apply filters based on provided parameters
+	if sailorID != "" {
+		db = db.Where("sailor_id = ?", sailorID)
+	}
+	if dockID != "" {
+		db = db.Where("dock_id = ?", dockID)
+	}
+	if paymentStatus != "" {
+		db = db.Where("payment_status ILIKE ?", paymentStatus)
+	}
+	if paymentMethod != "" {
+		db = db.Where("payment_method ILIKE ?", paymentMethod)
 	}
 
+	offset := (page - 1) * limit
+	var totalRecords int64
+	db.Count(&totalRecords)
+
 	err := db.Order("booking_id").Limit(limit).Offset(offset).Find(&bookings).Error
-	return bookings, err
+	totalPages := int((totalRecords + int64(limit) - 1) / int64(limit))
+	return bookings, page, totalPages, err
 }

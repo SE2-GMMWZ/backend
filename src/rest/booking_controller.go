@@ -3,7 +3,8 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
-	"backend/src/rest/shared"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -134,10 +135,38 @@ func (bc *bookingController) Delete(c *gin.Context) {
 // @Param        payment_status query     string false "Filter by payment status"
 // @Param        payment_method query     string false "Filter by payment method"
 // @Param        limit          query     int    false "Items per page"
+// @Param        page           query     int    false "Page number"
 // @Success      200    {object}  []model.Booking
 // @Router       /bookings/list [get]
 func (bc *bookingController) List(c *gin.Context) {
-	shared.ListWithQuery(c, bc.bookingRepository.ListBookings)
+	sailorID := c.Query("sailor_id")
+	dockID := c.Query("dock_id")
+	paymentStatus := c.Query("payment_status")
+	paymentMethod := c.Query("payment_method")
+	limitStr := c.DefaultQuery("limit", "10")
+	pageStr := c.DefaultQuery("page", "1")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		page = 1
+	}
+
+	bookings, currentPage, totalPages, err := bc.bookingRepository.ListBookings(limit, page, sailorID, dockID, paymentStatus, paymentMethod)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list bookings"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"bookings":     bookings,
+		"current_page": currentPage,
+		"total_pages":  totalPages,
+	})
 }
 
 func AddBookingRoutes(r *gin.Engine, bookingRepository *repository.BookingRepository) {

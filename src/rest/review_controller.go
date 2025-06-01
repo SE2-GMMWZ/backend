@@ -3,7 +3,7 @@ package rest
 import (
 	"backend/src/model"
 	"backend/src/repository"
-	"backend/src/rest/shared"
+	"strconv"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -133,10 +133,47 @@ func (rc *reviewController) Delete(c *gin.Context) {
 // @Param        rating       query     number false "Minimum rating"
 // @Param        comment      query     string false "Text search in comment"
 // @Param        limit        query     int    false "Items per page"
+// @Param        page         query     int    false "Page number"
 // @Success      200    {object}  []model.Review
 // @Router       /reviews/list [get]
 func (rc *reviewController) List(c *gin.Context) {
-	shared.ListWithQuery(c, rc.reviewRepository.ListReviews)
+	reviewerID := c.Query("reviewer_id")
+	ratingStr := c.Query("rating")
+	comment := c.Query("comment")
+	limitStr := c.DefaultQuery("limit", "10")
+
+	rating := 0.0
+	if ratingStr != "" {
+		rating, _ = strconv.ParseFloat(ratingStr, 64)
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		page = 1
+	}
+
+	var ratingPtr *float64
+	if ratingStr != "" {
+		ratingPtr = &rating
+	}
+
+	reviews, currentPage, totalPages, err := rc.reviewRepository.ListReviews(limit, page, reviewerID, ratingPtr, comment)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list reviews"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"reviews":     reviews,
+		"current_page": currentPage,
+		"total_pages":  totalPages,
+	})
 }
 
 func AddReviewRoutes(r *gin.Engine, reviewRepository *repository.ReviewRepository) {
