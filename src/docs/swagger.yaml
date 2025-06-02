@@ -51,6 +51,10 @@ definitions:
         type: number
       price_per_person:
         type: number
+      reviews:
+        items:
+          $ref: '#/definitions/model.Review'
+        type: array
       services:
         type: string
       services_pricing:
@@ -94,6 +98,8 @@ definitions:
       comment:
         type: string
       date_of_review:
+        type: string
+      docking_spot_id:
         type: string
       rating:
         type: number
@@ -1168,6 +1174,10 @@ paths:
       - description: Text search in comment
         in: query
         name: comment
+        type: string
+      - description: Filter by Docking Spot UUID
+        in: query
+        name: docking_spot_id
         type: string
       - description: Items per page
         in: query
