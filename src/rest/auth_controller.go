@@ -61,7 +61,7 @@ func (ac *authController) GetUserByID(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        id    path      string  true  "User UUID"
-// @Param        body  body      object  true  "User data to update"
+// @Param        body  body      model.UpdateUserRequest  true  "User data to update"
 // @Success      200   {object}  model.User
 // @Failure      400   {object}  map[string]string
 // @Failure      404   {object}  map[string]string
@@ -75,13 +75,7 @@ func (ac *authController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	var updateData struct {
-		Email   string         `json:"email"`
-		Name    string         `json:"name"`
-		Surname string         `json:"surname"`
-		Phone   string         `json:"phone"`
-		Role    model.UserRole `json:"role"`
-	}
+	var updateData model.UpdateUserRequest
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input."})
@@ -143,20 +137,13 @@ func (ac *authController) DeleteUser(c *gin.Context) {
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Param        body  body      object  true  "User sign-up credentials"
+// @Param        body  body      model.SignupRequest  true  "User sign-up credentials"
 // @Success      200   {object}  model.User
 // @Failure      400   {object}  map[string]string
 // @Failure      500   {object}  map[string]string
 // @Router       /signup [post]
 func (ac *authController) Signup(c *gin.Context) {
-	var credentials struct {
-		Email    string         `json:"email" binding:"required"`
-		Password string         `json:"password" binding:"required"`
-		Name     string         `json:"name" binding:"required"`
-		Surname  string         `json:"surname" binding:"required"`
-		Phone    string         `json:"phone" binding:"required"`
-		Role     model.UserRole `json:"role" binding:"required"`
-	}
+	var credentials model.SignupRequest
 
 	if err := c.ShouldBindJSON(&credentials); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
@@ -216,17 +203,14 @@ func (ac *authController) Signup(c *gin.Context) {
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Param        body  body      object  true  "User login credentials"
+// @Param        body  body      model.LoginRequest  true  "User login credentials"
 // @Success      200   {object}  model.User
 // @Failure      400   {object}  map[string]string
 // @Failure      401   {object}  map[string]string
 // @Failure      500   {object}  map[string]string
 // @Router       /login [post]
 func (ac *authController) Login(c *gin.Context) {
-	var credentials struct {
-		Email    string `json:"email" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
+	var credentials model.LoginRequest
 
 	if err := c.ShouldBindJSON(&credentials); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})

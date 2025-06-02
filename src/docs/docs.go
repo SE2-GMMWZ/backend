@@ -92,6 +92,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "Filter by Dock Owner UUID",
+                        "name": "dock_owner_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "Filter by payment status",
                         "name": "payment_status",
                         "in": "query"
@@ -1053,7 +1059,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/model.LoginRequest"
                         }
                     }
                 ],
@@ -1634,7 +1640,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/model.SignupRequest"
                         }
                     }
                 ],
@@ -1843,7 +1849,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/model.UpdateUserRequest"
                         }
                     }
                 ],
@@ -2032,6 +2038,12 @@ const docTemplate = `{
                 "author_id": {
                     "type": "string"
                 },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Comment"
+                    }
+                },
                 "content": {
                     "type": "string"
                 },
@@ -2056,6 +2068,23 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "model.LoginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "strongpassword"
                 }
             }
         },
@@ -2096,6 +2125,76 @@ const docTemplate = `{
                 },
                 "reviewer_id": {
                     "type": "string"
+                }
+            }
+        },
+        "model.SignupRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password",
+                "phone",
+                "role",
+                "surname"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "strongpassword"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "+123456789"
+                },
+                "role": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.UserRole"
+                        }
+                    ],
+                    "example": "editor"
+                },
+                "surname": {
+                    "type": "string",
+                    "example": "Doe"
+                }
+            }
+        },
+        "model.UpdateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "+123456789"
+                },
+                "role": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.UserRole"
+                        }
+                    ],
+                    "example": "editor"
+                },
+                "surname": {
+                    "type": "string",
+                    "example": "Doe"
                 }
             }
         },

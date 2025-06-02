@@ -64,6 +64,10 @@ definitions:
     properties:
       author_id:
         type: string
+      comments:
+        items:
+          $ref: '#/definitions/model.Comment'
+        type: array
       content:
         type: string
       guide_id:
@@ -81,6 +85,18 @@ definitions:
         type: string
       title:
         type: string
+    type: object
+  model.LoginRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: strongpassword
+        type: string
+    required:
+    - email
+    - password
     type: object
   model.Notification:
     properties:
@@ -106,6 +122,54 @@ definitions:
       review_id:
         type: string
       reviewer_id:
+        type: string
+    type: object
+  model.SignupRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      name:
+        example: John
+        type: string
+      password:
+        example: strongpassword
+        type: string
+      phone:
+        example: "+123456789"
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/model.UserRole'
+        example: editor
+      surname:
+        example: Doe
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - phone
+    - role
+    - surname
+    type: object
+  model.UpdateUserRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      name:
+        example: John
+        type: string
+      phone:
+        example: "+123456789"
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/model.UserRole'
+        example: editor
+      surname:
+        example: Doe
         type: string
     type: object
   model.User:
@@ -281,6 +345,10 @@ paths:
       - description: Filter by Dock UUID
         in: query
         name: dock_id
+        type: string
+      - description: Filter by Dock Owner UUID
+        in: query
+        name: dock_owner_id
         type: string
       - description: Filter by payment status
         in: query
@@ -825,7 +893,7 @@ paths:
         name: body
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/model.LoginRequest'
       produces:
       - application/json
       responses:
@@ -1210,7 +1278,7 @@ paths:
         name: body
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/model.SignupRequest'
       produces:
       - application/json
       responses:
@@ -1332,7 +1400,7 @@ paths:
         name: body
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/model.UpdateUserRequest'
       produces:
       - application/json
       responses:
