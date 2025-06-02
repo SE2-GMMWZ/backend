@@ -1437,6 +1437,12 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "description": "Filter by Docking Spot UUID",
+                        "name": "docking_spot_id",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "description": "Items per page",
                         "name": "limit",
@@ -2006,6 +2012,12 @@ const docTemplate = `{
                 "price_per_person": {
                     "type": "number"
                 },
+                "reviews": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Review"
+                    }
+                },
                 "services": {
                     "type": "string"
                 },
@@ -2071,6 +2083,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "date_of_review": {
+                    "type": "string"
+                },
+                "docking_spot_id": {
                     "type": "string"
                 },
                 "rating": {
