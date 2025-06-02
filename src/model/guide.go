@@ -2,8 +2,9 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Guide struct {
@@ -16,4 +17,14 @@ type Guide struct {
 	Links           *json.RawMessage `gorm:"column:links;type:jsonb" json:"links,omitempty" swaggertype:"object"`
 	Location        json.RawMessage  `gorm:"column:location;type:jsonb" json:"location" swaggertype:"object"` // latitude, longitude
 	IsApproved      bool             `gorm:"column:is_approved" json:"is_approved"`
+	Comments        []Comment        `gorm:"foreignKey:GuideID" json:"comments"`
+}
+
+func (g Guide) MarshalJSON() ([]byte, error) {
+	type Alias Guide
+	aux := Alias(g)
+	if aux.Comments == nil {
+		aux.Comments = make([]Comment, 0)
+	}
+	return json.Marshal(aux)
 }
