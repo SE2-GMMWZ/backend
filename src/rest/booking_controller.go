@@ -132,6 +132,7 @@ func (bc *bookingController) Delete(c *gin.Context) {
 // @Produce      json
 // @Param        sailor_id      query     string false "Filter by Sailor UUID"
 // @Param        dock_id        query     string false "Filter by Dock UUID"
+// @Param        dock_owner_id  query     string false "Filter by Dock Owner UUID"
 // @Param        payment_status query     string false "Filter by payment status"
 // @Param        payment_method query     string false "Filter by payment method"
 // @Param        limit          query     int    false "Items per page"
@@ -141,6 +142,7 @@ func (bc *bookingController) Delete(c *gin.Context) {
 func (bc *bookingController) List(c *gin.Context) {
 	sailorID := c.Query("sailor_id")
 	dockID := c.Query("dock_id")
+	dockOwnerID := c.Query("dock_owner_id")
 	paymentStatus := c.Query("payment_status")
 	paymentMethod := c.Query("payment_method")
 	limitStr := c.DefaultQuery("limit", "10")
@@ -156,7 +158,7 @@ func (bc *bookingController) List(c *gin.Context) {
 		page = 1
 	}
 
-	bookings, currentPage, totalPages, err := bc.bookingRepository.ListBookings(limit, page, sailorID, dockID, paymentStatus, paymentMethod)
+	bookings, currentPage, totalPages, err := bc.bookingRepository.ListBookings(limit, page, sailorID, dockID, dockOwnerID, paymentStatus, paymentMethod)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list bookings"})
 		return
