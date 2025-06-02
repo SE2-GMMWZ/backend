@@ -16,4 +16,5 @@ type DockingSpot struct {
 	PricePerNight   float64         `gorm:"column:price_per_night" json:"price_per_night"`
 	PricePerPerson  *float64        `gorm:"column:price_per_person" json:"price_per_person,omitempty"`
 	Availability    string          `gorm:"column:availability" json:"availability"` // 'available' or 'unavailable'
+	Reviews         []Review        `gorm:"foreignKey:DockingSpotID;references:DockID" json:"reviews,omitempty"`
 }

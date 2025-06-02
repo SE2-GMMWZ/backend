@@ -20,7 +20,7 @@ func (r *DockingSpotRepository) CreateDockingSpot(dock *model.DockingSpot) error
 
 func (r *DockingSpotRepository) GetDockingSpotByID(id uuid.UUID) (*model.DockingSpot, error) {
 	var dock model.DockingSpot
-	err := r.db.First(&dock, "dock_id = ?", id).Error
+	err := r.db.Preload("Reviews").First(&dock, "dock_id = ?", id).Error
 	return &dock, err
 }
 

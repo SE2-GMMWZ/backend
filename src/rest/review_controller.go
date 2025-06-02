@@ -129,17 +129,19 @@ func (rc *reviewController) Delete(c *gin.Context) {
 // @Description  Returns paginated list of reviews; supports query parameters forwarded to repository
 // @Tags         Reviews
 // @Produce      json
-// @Param        reviewer_id  query     string false "Filter by Reviewer UUID"
-// @Param        rating       query     number false "Minimum rating"
-// @Param        comment      query     string false "Text search in comment"
-// @Param        limit        query     int    false "Items per page"
-// @Param        page         query     int    false "Page number"
+// @Param        reviewer_id     query     string  false "Filter by Reviewer UUID"
+// @Param        rating          query     number  false "Minimum rating"
+// @Param        comment         query     string  false "Text search in comment"
+// @Param        docking_spot_id query     string  false "Filter by Docking Spot UUID"
+// @Param        limit           query     int     false "Items per page"
+// @Param        page            query     int     false "Page number"
 // @Success      200    {object}  []model.Review
 // @Router       /reviews/list [get]
 func (rc *reviewController) List(c *gin.Context) {
 	reviewerID := c.Query("reviewer_id")
 	ratingStr := c.Query("rating")
 	comment := c.Query("comment")
+	dockingSpotID := c.Query("docking_spot_id")
 	limitStr := c.DefaultQuery("limit", "10")
 
 	rating := 0.0
@@ -163,7 +165,7 @@ func (rc *reviewController) List(c *gin.Context) {
 		ratingPtr = &rating
 	}
 
-	reviews, currentPage, totalPages, err := rc.reviewRepository.ListReviews(limit, page, reviewerID, ratingPtr, comment)
+	reviews, currentPage, totalPages, err := rc.reviewRepository.ListReviews(limit, page, reviewerID, ratingPtr, comment, dockingSpotID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to list reviews"})
 		return
