@@ -2126,7 +2126,7 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "admin",
-                "user",
+                "editor",
                 "dock_owner",
                 "sailor"
             ],

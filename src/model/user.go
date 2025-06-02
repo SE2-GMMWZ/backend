@@ -6,7 +6,7 @@ type UserRole string
 
 const (
     RoleAdmin     UserRole = "admin"
-    RoleEditor    UserRole = "user"
+    RoleEditor    UserRole = "editor"
     RoleDockOwner UserRole = "dock_owner"
     RoleSailor    UserRole = "sailor"
 )
