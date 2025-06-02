@@ -33,7 +33,7 @@ func (r *BookingRepository) DeleteBooking(id uuid.UUID) error {
 	return r.db.Delete(&model.Booking{}, "booking_id = ?", id).Error
 }
 
-func (r *BookingRepository) ListBookings(limit, page int, sailorID, dockID, paymentStatus, paymentMethod string) ([]model.Booking, int, int, error) {
+func (r *BookingRepository) ListBookings(limit, page int, sailorID, dockID, dockOwnerID, paymentStatus, paymentMethod string) ([]model.Booking, int, int, error) {
 	var bookings []model.Booking
 	db := r.db.Model(&model.Booking{})
 
@@ -43,6 +43,11 @@ func (r *BookingRepository) ListBookings(limit, page int, sailorID, dockID, paym
 	}
 	if dockID != "" {
 		db = db.Where("dock_id = ?", dockID)
+	}
+	if dockOwnerID != "" {
+		// Join with docking_spots to filter by owner_id
+		db = db.Joins("JOIN docking_spots ON bookings.dock_id = docking_spots.dock_id").
+			Where("docking_spots.owner_id = ?", dockOwnerID)
 	}
 	if paymentStatus != "" {
 		db = db.Where("payment_status ILIKE ?", paymentStatus)

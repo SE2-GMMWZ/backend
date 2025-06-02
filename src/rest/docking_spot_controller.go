@@ -162,7 +162,7 @@ func (dsc *dockingSpotController) List(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"docking_spots": dockingSpots,
-		"page":          currentPage,
+		"current_page":  currentPage,
 		"total_pages":   totalPages,
 	})
 }
